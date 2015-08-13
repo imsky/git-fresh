@@ -63,7 +63,7 @@ else
     echo -n $STALE | xargs git push $REMOTE --delete
   else
     echo "Stale branches found:" $(echo -n $STALE | tr -s "\r\n" " " | tr -s " ")
-    echo "Delete stale branches with git fresh -f"
+    echo "Delete stale branches with: git fresh -f"
   fi
 fi
 
@@ -73,7 +73,7 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
     git rebase $REMOTE/$ROOT
   fi
 else
-  echo "Previous branch was stale, staying on $ROOT"
+  echo "$CURRENT branch was stale, staying on $ROOT"
 fi
 
 if [[ ! -z $(git stash list | grep $STASH_STAMP) ]]; then
