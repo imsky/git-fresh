@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+CURRENT=$(git rev-parse --abbrev-ref HEAD)
+REMOTE=${1:-origin}
+ROOT=${2:-master}
+
+git stash
+
+git remote update
+git checkout $ROOT
+git rebase $REMOTE/$ROOT
+git remote prune $REMOTE
+
+STALE=$(git branch -r --merged | grep $REMOTE | grep -Ev ">|$ROOT")
+STALE=${STALE//$REMOTE\/}
+
+echo $STALE | xargs git branch -d -r
+echo $STALE | xargs git push $REMOTE --delete
+
+git checkout $CURRENT
+git stash apply
