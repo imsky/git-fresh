@@ -43,10 +43,14 @@ if [[ -z "${STALE// }" ]]; then
   echo "No stale branches to delete"
 else
   #todo: deletion confirmation
-  echo $STALE | xargs git branch -d
+  echo $STALE | xargs git branch -D
   echo $STALE | xargs git push $REMOTE --delete
 fi
 
-git checkout $CURRENT
+if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
+  git checkout $CURRENT
+else
+  echo "Previous branch was stale, staying on $ROOT"
+fi
 
 git stash apply
