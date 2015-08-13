@@ -59,8 +59,8 @@ if [[ -z "${STALE// }" ]]; then
   echo "No stale branches to delete"
 else
   if [[ "$FORCE_DELETE_STALE" = true ]]; then
-    echo $STALE | xargs git branch -D 2> /dev/null
-    echo $STALE | xargs git push $REMOTE --delete
+    echo -n $STALE | xargs git branch -D 2> /dev/null
+    echo -n $STALE | xargs git push $REMOTE --delete
   else
     echo "Stale branches found:" $(echo -n $STALE | tr -s "\r\n" " " | tr -s " ")
     echo "Delete stale branches with git fresh -f"
