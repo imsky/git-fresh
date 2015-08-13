@@ -11,7 +11,7 @@ usage () {
   exit 1;
 }
 
-while getopts "fsF" opt; do
+while getopts "fsrF" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
