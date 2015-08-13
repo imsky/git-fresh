@@ -2,16 +2,16 @@
 
 Keep your repo fresh with one command.
 
-* Rebases local master and prunes stale remote branches
-* Rebases local branch against remote master with `-r` flag
-* Deletes stale branches with `-f` flag
+* Updates local master to match remote, prunes stale branches
+* Rebases current branch against remote master with `-r` flag
+* Deletes stale local and remote branches with `-f` flag
 * Wipes the slate clean with `-F` flag
 
 ## Usage
 
 ```
 Usage: git fresh [-frsF] [remote] [root]
--f: Force delete stale branches
+-f: Delete stale local and remote branches
 -r: Rebase current branch against remote root
 -s: Apply stashed changes after run
 -F: Destroy local state, sync to remote root
