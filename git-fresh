@@ -4,7 +4,7 @@ usage () {
   echo "Usage: $0 [-fsF] [remote] [root]"
   echo "-f: Force delete stale branches"
   echo "-s: Apply stashed changes after run"
-  echo "-F: Force reset local root to remote root"
+  echo "-F: Destroy local state, sync to remote root"
   echo "remote: remote name, default is origin"
   echo "root: root branch, default is master"
   exit 1;
