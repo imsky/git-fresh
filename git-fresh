@@ -1,5 +1,30 @@
 #!/usr/bin/env bash
 
+usage () {
+  echo "Usage: $0 [-fF] [remote] [root]"
+  echo "-f: Force delete stale remote branches"
+  echo "-F: Force reset local root to remote root"
+  echo "remote: remote name, default is origin"
+  echo "root: root branch, default is master"
+  exit 1;
+}
+
+while getopts "fF" opt; do
+  case $opt in
+    f)
+      FORCE_DELETE_STALE=true
+      ;;
+    F)
+      FORCE_LOCAL_STATE=true
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
