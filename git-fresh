@@ -63,7 +63,7 @@ else
     echo $STALE | xargs git push $REMOTE --delete
   else
     echo "Stale branches found:" $(echo -n $STALE | tr -s "\r\n" " " | tr -s " ")
-    echo "Delete stale branches with ${0} -f"
+    echo "Delete stale branches with git fresh -f"
   fi
 fi
 
