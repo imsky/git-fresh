@@ -2,7 +2,7 @@
 
 Keep your repo fresh with one command.
 
-* Rebases local master against remote master
+* Rebases local master and prunes stale remote branches
 * Rebases local branch against remote master with `-r` flag
 * Deletes stale branches with `-f` flag
 * Wipes the slate clean with `-F` flag
