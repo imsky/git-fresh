@@ -30,7 +30,6 @@ REMOTE=${1:-origin}
 ROOT=${2:-master}
 
 STASH_STAMP=git-fresh-$(date +%s)
-
 git stash save $STASH_STAMP
 
 git remote update
