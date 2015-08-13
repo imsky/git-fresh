@@ -14,7 +14,7 @@ Usage: git fresh [-frsF] [remote] [root]
 -f: Delete stale local and remote branches
 -r: Rebase current branch against remote root
 -s: Apply stashed changes after run
--F: Destroy local state, sync to remote root
+-F: Reset local root to remote root, wipe workspace
 remote: remote name, default is origin
 root: root branch, default is master
 ```
