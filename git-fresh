@@ -41,17 +41,7 @@ STASH_STAMP=git-fresh-$(date +%s)
 git stash save $STASH_STAMP
 
 git remote update
-git checkout $ROOT
-
-if [[ "$FORCE_LOCAL_RESET" = true ]]; then
-  git clean -dfx
-  git reset --hard $REMOTE/$ROOT
-else
-  git rebase $REMOTE/$ROOT
-fi
-
 git remote prune $REMOTE
-
 STALE=$(git branch -r --merged | grep $REMOTE | grep -Ev ">|$ROOT")
 STALE=${STALE//$REMOTE\/}
 
@@ -65,6 +55,15 @@ else
     echo "Stale branches found:" $(echo -n $STALE | tr -s "\r\n" " " | tr -s " ")
     echo "Delete stale branches with: git fresh -f"
   fi
+fi
+
+git checkout $ROOT
+
+if [[ "$FORCE_LOCAL_RESET" = true ]]; then
+  git clean -dfx
+  git reset --hard $REMOTE/$ROOT
+else
+  git rebase $REMOTE/$ROOT
 fi
 
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
