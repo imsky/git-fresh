@@ -29,7 +29,9 @@ CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
 
-git stash
+STASH_STAMP=git-fresh-$(date +%s)
+
+git stash save $STASH_STAMP
 
 git remote update
 git checkout $ROOT
@@ -53,4 +55,6 @@ else
   echo "Previous branch was stale, staying on $ROOT"
 fi
 
-git stash apply
+if [[ ! -z $(git stash list | grep $STASH_STAMP) ]]; then
+  echo "Stashed changes present, apply with: git stash pop"
+fi
