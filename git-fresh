@@ -2,7 +2,7 @@
 
 usage () {
   echo "Usage: git fresh [-frsF] [remote] [root]"
-  echo "-f: Force delete stale branches"
+  echo "-f: Delete stale local and remote branches"
   echo "-r: Rebase current branch against remote root"
   echo "-s: Apply stashed changes after run"
   echo "-F: Destroy local state, sync to remote root"
