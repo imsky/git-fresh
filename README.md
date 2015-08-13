@@ -19,6 +19,11 @@ remote: remote name, default is origin
 root: root branch, default is master
 ```
 
+## Installation
+
+1. Download
+2. `sudo make install`
+
 ## License
 
 git-fresh is provided under the [MIT License](http://opensource.org/licenses/MIT).
