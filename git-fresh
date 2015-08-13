@@ -46,16 +46,12 @@ STALE=$(git branch -r --merged | grep $REMOTE | grep -Ev ">|$ROOT")
 STALE=${STALE//$REMOTE\/}
 ORPHANS=$(git branch --merged $REMOTE/$ROOT | grep -v "$ROOT")
 
-if [[ -z "${STALE// }" ]]; then
-  echo "No stale branches found"
-else
+if [[ ! -z "${STALE// }" ]]; then
   echo "Stale branches found:" $(echo -n $STALE | tr -s "\r\n" " " | tr -s " ")
   echo "Delete stale branches with: git fresh -f"
 fi
 
-if [[ -z "${ORPHANS// }" ]]; then
-  echo "No orphan branches found"
-else
+if [[ ! -z "${ORPHANS// }" ]]; then
   echo "Orphan branches found:" $(echo -n $ORPHANS | tr -s "\r\n" " " | tr -s " ")
   echo "Delete orphan branches with: git fresh -f"
 fi
