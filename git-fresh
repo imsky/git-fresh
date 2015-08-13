@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 usage () {
-  echo "Usage: $0 [-fsF] [remote] [root]"
+  echo "Usage: git fresh [-frsF] [remote] [root]"
   echo "-f: Force delete stale branches"
+  echo "-r: Rebase current branch against remote root"
   echo "-s: Apply stashed changes after run"
   echo "-F: Destroy local state, sync to remote root"
   echo "remote: remote name, default is origin"
@@ -17,6 +18,9 @@ while getopts "fsF" opt; do
       ;;
     s)
       APPLY_STASH=true
+      ;;
+    r)
+      REBASE=true
       ;;
     F)
       FORCE_LOCAL_RESET=true
@@ -65,6 +69,9 @@ fi
 
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   git checkout $CURRENT
+  if [[ "$REBASE" = true ]]; then
+    git rebase $REMOTE/$ROOT
+  fi
 else
   echo "Previous branch was stale, staying on $ROOT"
 fi
