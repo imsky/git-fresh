@@ -44,7 +44,7 @@ STALE=${STALE//$REMOTE\/}
 if [[ -z "${STALE// }" ]]; then
   echo "No stale branches to delete"
 else
-  if [ $FORCE_DELETE_STALE = true ]; then
+  if [[ "$FORCE_DELETE_STALE" = true ]]; then
     echo $STALE | xargs git branch -D
     echo $STALE | xargs git push $REMOTE --delete
   else
