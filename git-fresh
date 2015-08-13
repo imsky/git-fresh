@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
 
 usage () {
-  echo "Usage: $0 [-fF] [remote] [root]"
+  echo "Usage: $0 [-fsF] [remote] [root]"
   echo "-f: Force delete stale branches"
+  echo "-s: Apply stashed changes after run"
   echo "-F: Force reset local root to remote root"
   echo "remote: remote name, default is origin"
   echo "root: root branch, default is master"
   exit 1;
 }
 
-while getopts "fF" opt; do
+while getopts "fsF" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
+      ;;
+    f)
+      APPLY_STASH=true
       ;;
     F)
       FORCE_LOCAL_RESET=true
@@ -66,5 +70,9 @@ else
 fi
 
 if [[ ! -z $(git stash list | grep $STASH_STAMP) ]]; then
-  echo "Stashed changes present, apply with: git stash pop"
+  if [[ "$APPLY_STASH" = true ]]; then
+    git stash pop
+  else
+    echo "Stashed changes present, apply with: git stash pop"
+  fi
 fi
