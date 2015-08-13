@@ -4,6 +4,8 @@ CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
 
+#todo: getopts
+
 git stash
 
 git remote update
@@ -14,8 +16,11 @@ git remote prune $REMOTE
 STALE=$(git branch -r --merged | grep $REMOTE | grep -Ev ">|$ROOT")
 STALE=${STALE//$REMOTE\/}
 
+#todo: deletion confirmation
+
 echo $STALE | xargs git branch -d -r
 echo $STALE | xargs git push $REMOTE --delete
 
 git checkout $CURRENT
+
 git stash apply
