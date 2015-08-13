@@ -77,4 +77,4 @@ if [[ ! -z $(git stash list | grep $STASH_STAMP) ]]; then
   fi
 fi
 
-git gc --prune=now
+git gc --auto --prune=now
