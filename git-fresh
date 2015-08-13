@@ -15,7 +15,7 @@ while getopts "fsF" opt; do
     f)
       FORCE_DELETE_STALE=true
       ;;
-    f)
+    s)
       APPLY_STASH=true
       ;;
     F)
