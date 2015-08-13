@@ -15,7 +15,7 @@ while getopts "fF" opt; do
       FORCE_DELETE_STALE=true
       ;;
     F)
-      FORCE_LOCAL_STATE=true
+      FORCE_LOCAL_RESET=true
       ;;
     *)
       usage
@@ -35,7 +35,14 @@ git stash save $STASH_STAMP
 
 git remote update
 git checkout $ROOT
-git rebase $REMOTE/$ROOT
+
+if [[ "$FORCE_LOCAL_RESET" = true ]]; then
+  git clean -dfx
+  git reset --hard $REMOTE/$ROOT
+else
+  git rebase $REMOTE/$ROOT
+fi
+
 git remote prune $REMOTE
 
 STALE=$(git branch -r --merged | grep $REMOTE | grep -Ev ">|$ROOT")
