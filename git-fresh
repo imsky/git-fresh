@@ -33,6 +33,8 @@ done
 
 shift $((OPTIND-1))
 
+trap 'exit' ERR
+
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
@@ -41,7 +43,7 @@ git remote update
 git remote prune $REMOTE
 
 STASH_STAMP=git-fresh-$(date +%s)
-git stash save -q $STASH_STAMP
+git stash save $STASH_STAMP
 git checkout $ROOT 2> /dev/null
 
 if [[ "$FORCE_LOCAL_RESET" = true ]]; then
