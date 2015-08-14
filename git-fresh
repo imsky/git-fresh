@@ -11,6 +11,10 @@ usage () {
   exit 1;
 }
 
+error () {
+  echo "Error on line $1"
+}
+
 while getopts "fsrF" opt; do
   case $opt in
     f)
@@ -33,7 +37,7 @@ done
 
 shift $((OPTIND-1))
 
-trap 'exit' ERR
+trap 'error $LINENO' ERR
 
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
@@ -53,10 +57,10 @@ else
   git rebase -q $REMOTE/$ROOT
 fi
 
-SMART_STALE=$(git branch -a --merged | tr -d "\*" | tr -s " " | grep -Ev ">|$ROOT")
+SMART_STALE=$(git branch -a --merged | tr -d "\*" | tr -s " " | grep -Ev ">|$ROOT" | cat)
 
-LOCAL_STALE=$(grep -v "remotes/" <<< "$SMART_STALE")
-REMOTE_STALE=$(grep "remotes/" <<< "$SMART_STALE")
+LOCAL_STALE=$(grep -v "remotes/" <<< "$SMART_STALE" | cat)
+REMOTE_STALE=$(grep "remotes/" <<< "$SMART_STALE" | cat)
 REMOTE_STALE=${REMOTE_STALE//remotes\/$REMOTE\/}
 
 if [[ ! -z "${SMART_STALE// }" ]]; then
