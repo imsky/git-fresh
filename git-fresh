@@ -41,7 +41,7 @@ git remote update
 git remote prune $REMOTE
 
 STASH_STAMP=git-fresh-$(date +%s)
-git stash save $STASH_STAMP 2> /dev/null
+git stash save -q $STASH_STAMP
 git checkout $ROOT 2> /dev/null
 
 STALE=$(git branch -r --merged | grep $REMOTE | grep -Ev ">|$ROOT")
