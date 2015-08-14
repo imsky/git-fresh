@@ -40,6 +40,10 @@ ROOT=${2:-master}
 git remote update
 git remote prune $REMOTE
 
+STASH_STAMP=git-fresh-$(date +%s)
+git stash save $STASH_STAMP
+git checkout $ROOT
+
 STALE=$(git branch -r --merged | grep $REMOTE | grep -Ev ">|$ROOT")
 STALE=${STALE//$REMOTE\/}
 ORPHANS=$(git branch --merged $REMOTE/$ROOT | grep -v "$ROOT")
@@ -62,11 +66,6 @@ if [[ ! -z "${ORPHANS// }" ]]; then
     echo "Delete orphan branches with: git fresh -f"
   fi
 fi
-
-STASH_STAMP=git-fresh-$(date +%s)
-git stash save $STASH_STAMP
-
-git checkout $ROOT
 
 if [[ "$FORCE_LOCAL_RESET" = true ]]; then
   git clean -dfx
