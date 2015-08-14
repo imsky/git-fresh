@@ -67,11 +67,11 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
   fi
 
   if [[ ! -z "${REMOTE_STALE// }" ]]; then
-      if [[ "$FORCE_DELETE_STALE" = true ]]; then
-        echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
-      else
-        echo "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
-      fi
+    if [[ "$FORCE_DELETE_STALE" = true ]]; then
+      echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
+    else
+      echo "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
+    fi
   fi
 
   if [[ "$FORCE_DELETE_STALE" != true ]]; then
