@@ -50,7 +50,7 @@ LOCAL_STALE=$(grep -v "remotes/" <<< "$SMART_STALE")
 REMOTE_STALE=$(grep "remotes/" <<< "$SMART_STALE")
 REMOTE_STALE=${REMOTE_STALE//remotes\/$REMOTE\/}
 
-if [[ ! -z "${SMART_STALE// }" ]]
+if [[ ! -z "${SMART_STALE// }" ]]; then
   if [[ "$FORCE_DELETE_STALE" = true ]]; then
     echo -n $LOCAL_STALE | xargs git branch -d 2> /dev/null
     echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
