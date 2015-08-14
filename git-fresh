@@ -6,8 +6,8 @@ usage () {
   echo "-r: Rebase current branch against remote root"
   echo "-s: Apply stashed changes after run"
   echo "-F: Reset local root to remote root, wipe workspace"
-  echo "remote: remote name, default is origin"
-  echo "root: root branch, default is master"
+  echo "remote: remote name, origin by default"
+  echo "root: root branch, master by default"
   exit 1;
 }
 
