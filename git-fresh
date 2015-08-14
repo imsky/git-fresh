@@ -41,8 +41,8 @@ git remote update
 git remote prune $REMOTE
 
 STASH_STAMP=git-fresh-$(date +%s)
-git stash save $STASH_STAMP
-git checkout $ROOT
+git stash save $STASH_STAMP 2> /dev/null
+git checkout $ROOT 2> /dev/null
 
 STALE=$(git branch -r --merged | grep $REMOTE | grep -Ev ">|$ROOT")
 STALE=${STALE//$REMOTE\/}
@@ -75,7 +75,7 @@ else
 fi
 
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
-  git checkout $CURRENT
+  git checkout $CURRENT 2> /dev/null
   if [[ "$REBASE" = true ]]; then
     git rebase $REMOTE/$ROOT
   fi
