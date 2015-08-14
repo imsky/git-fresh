@@ -67,12 +67,16 @@ if [[ ! -z "${ORPHANS// }" ]]; then
   fi
 fi
 
-SMART_STALE=$(git branch -a --merged $REMOTE/$ROOT | grep -Ev ">|$ROOT")
-SMART_STALE=${SMART_STALE//$REMOTE\/}
+SMART_STALE=$(git branch -a --merged | tr -d "\*" | tr -s " " | grep -Ev ">|$ROOT")
 
 if [[ "$SMART_STALE_ENABLED" == "true" ]]; then
-  echo "Smart stale branches found:"
-  echo -n $SMART_STALE
+  LOCAL_STALE=$(grep -v "remotes/" <<< "$SMART_STALE")
+  REMOTE_STALE=$(grep "remotes/" <<< "$SMART_STALE")
+  REMOTE_STALE=${REMOTE_STALE//remotes\/$REMOTE\/}
+
+  echo "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
+  echo "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
+  echo "Delete stale branches with: git fresh -f"
 fi
 
 if [[ "$FORCE_LOCAL_RESET" = true ]]; then
