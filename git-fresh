@@ -72,7 +72,8 @@ SMART_STALE=${SMART_STALE//$REMOTE\/}
 
 if [[ "$SMART_STALE_ENABLED" == "true" ]]; then
   echo "Smart stale branches found:"
-  echo -n $SMART_STALE
+  echo -n $SMART_STALE | grep -v 'remotes/'
+  echo -n $SMART_STALE | grep 'remotes/'
 fi
 
 if [[ "$FORCE_LOCAL_RESET" = true ]]; then
