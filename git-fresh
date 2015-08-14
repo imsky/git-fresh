@@ -50,13 +50,15 @@ LOCAL_STALE=$(grep -v "remotes/" <<< "$SMART_STALE")
 REMOTE_STALE=$(grep "remotes/" <<< "$SMART_STALE")
 REMOTE_STALE=${REMOTE_STALE//remotes\/$REMOTE\/}
 
-if [[ "$FORCE_DELETE_STALE" = true ]]; then
-  echo -n $LOCAL_STALE | xargs git branch -d 2> /dev/null
-  echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
-else
-  echo "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
-  echo "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
-  echo "Delete stale branches with: git fresh -f"
+if [[ ! -z "${SMART_STALE// }" ]]
+  if [[ "$FORCE_DELETE_STALE" = true ]]; then
+    echo -n $LOCAL_STALE | xargs git branch -d 2> /dev/null
+    echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
+  else
+    echo "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
+    echo "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
+    echo "Delete stale branches with: git fresh -f"
+  fi
 fi
 
 if [[ "$FORCE_LOCAL_RESET" = true ]]; then
