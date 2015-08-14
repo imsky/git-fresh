@@ -15,8 +15,8 @@ Usage: git fresh [-frsF] [remote] [root]
 -r: Rebase current branch against remote root
 -s: Apply stashed changes after run
 -F: Reset local root to remote root, wipe workspace
-remote: remote name, default is origin
-root: root branch, default is master
+remote: remote name, origin by default
+root: root branch, master by default
 ```
 
 ## Installation
