@@ -67,6 +67,14 @@ if [[ ! -z "${ORPHANS// }" ]]; then
   fi
 fi
 
+SMART_STALE=$(git branch -a --merged $REMOTE/$ROOT | grep -Ev ">|$ROOT")
+SMART_STALE=${SMART_STALE//$REMOTE\/}
+
+if [[ "$SMART_STALE" -eq "on" ]]; then
+  echo "Smart stale branches found:"
+  echo -n $SMART_STALE
+fi
+
 if [[ "$FORCE_LOCAL_RESET" = true ]]; then
   git clean -dfx
   git reset --hard $REMOTE/$ROOT
