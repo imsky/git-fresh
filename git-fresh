@@ -71,9 +71,9 @@ SMART_STALE=$(git branch -a --merged $REMOTE/$ROOT | grep -Ev ">|master|\*" | tr
 
 if [[ "$SMART_STALE_ENABLED" == "true" ]]; then
   echo "SS Local branches found:"
-  echo $(echo $SMART_STALE | grep -v 'remotes/')
+  echo $(printf $SMART_STALE | grep -v 'remotes/')
   echo "SS Remote branches found:"
-  echo $(echo $SMART_STALE | grep 'remotes/')
+  echo $(printf $SMART_STALE | grep 'remotes/')
 fi
 
 if [[ "$FORCE_LOCAL_RESET" = true ]]; then
