@@ -21,7 +21,7 @@ root: root branch, master by default
 
 ## Installation
 
-1. Download
+1. Clone or download
 2. `sudo make install`
 
 ## License
