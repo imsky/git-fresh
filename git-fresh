@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 usage () {
-  echo "Usage: git fresh [-frsF] [remote] [root]"
+  echo "Usage: git fresh [-fmrsF] [remote] [root]"
   echo "-f: Delete stale local and remote branches"
+  echo "-m: Merge remote root into current branch"
   echo "-r: Rebase current branch against remote root"
   echo "-s: Apply stashed changes after run"
   echo "-F: Reset local root to remote root, wipe workspace"
@@ -17,16 +18,19 @@ error () {
 
 trap 'error $LINENO' ERR
 
-while getopts "fsrF" opt; do
+while getopts "fmrsF" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
       ;;
-    s)
-      APPLY_STASH=true
+    m)
+      MERGE=true
       ;;
     r)
       REBASE=true
+      ;;
+    s)
+      APPLY_STASH=true
       ;;
     F)
       FORCE_LOCAL_RESET=true
@@ -87,8 +91,13 @@ fi
 
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   git checkout $CURRENT 2> /dev/null
-  if [[ "$REBASE" = true ]]; then
-    git rebase $REMOTE/$ROOT
+
+  if [ "$REBASE" = true ] && [ "$MERGE" = true ]; then
+    echo "Rebase and merge enabled, skipping both"
+  else
+    if [[ "$REBASE" = true ]]; then
+      git rebase $REMOTE/$ROOT
+    fi
   fi
 else
   echo "$CURRENT branch was stale, staying on $ROOT"
