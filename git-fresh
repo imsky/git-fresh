@@ -100,7 +100,7 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
     fi
 
     if [[ "$MERGE" = true ]]; then
-      git merge $REMOTE/$ROOT
+      git merge --no-edit $REMOTE/$ROOT
     fi
   fi
 else
