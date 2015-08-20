@@ -10,8 +10,9 @@ Keep your repo fresh with one command.
 ## Usage
 
 ```
-Usage: git fresh [-frsF] [remote] [root]
+Usage: git fresh [-fmrsF] [remote] [root]
 -f: Delete stale local and remote branches
+-m: Merge remote root into current branch
 -r: Rebase current branch against remote root
 -s: Apply stashed changes after run
 -F: Reset local root to remote root, wipe workspace
