@@ -98,6 +98,10 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
     if [[ "$REBASE" = true ]]; then
       git rebase $REMOTE/$ROOT
     fi
+
+    if [[ "$MERGE" = true ]]; then
+      git merge $REMOTE/$ROOT
+    fi
   fi
 else
   echo "$CURRENT branch was stale, staying on $ROOT"
