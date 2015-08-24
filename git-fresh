@@ -12,8 +12,9 @@ usage () {
   exit 1;
 }
 
+#todo: output error line
 error () {
-  echo "Error on line $1"
+  echo "git-fresh: Error on line $1"
 }
 
 trap 'error $LINENO' ERR
