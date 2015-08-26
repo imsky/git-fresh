@@ -3,9 +3,9 @@
 Keep your repo fresh with one command.
 
 * Updates local master to match remote, prunes stale branches
-* Rebases current branch against remote master with `-r` flag
-* Merges remote master into current branch with `-m` flag
 * Deletes stale local and remote branches with `-f` flag
+* Merges remote master into current branch with `-m` flag
+* Rebases current branch against remote master with `-r` flag
 * Wipes the slate clean with `-F` flag
 
 ## Usage
