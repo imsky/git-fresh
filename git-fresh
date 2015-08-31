@@ -62,10 +62,12 @@ else
   git rebase -q $REMOTE/$ROOT
 fi
 
-SMART_STALE=$(git branch -a --merged | tr -d "\*" | tr -s " " | grep -Ev ">|$ROOT" | cat)
+SMART_STALE=$(git branch -a --merged | tr -d "\* " | grep -Ev ">|$ROOT" | cat)
 
-LOCAL_STALE=$(grep -v "remotes/" <<< "$SMART_STALE" | cat)
-REMOTE_STALE=$(grep "remotes/" <<< "$SMART_STALE" | cat)
+LOCAL_STALE=$(grep -Ev "^remotes/" <<< "$SMART_STALE" | cat)
+REMOTE_STALE=$(grep -E "^remotes/" <<< "$SMART_STALE" | cat)
+#todo: add flag to prune all remote branches
+REMOTE_STALE=$(grep "^remotes/$REMOTE" <<< "$REMOTE_STALE" | cat)
 REMOTE_STALE=${REMOTE_STALE//remotes\/$REMOTE\/}
 
 if [[ ! -z "${SMART_STALE// }" ]]; then
