@@ -14,17 +14,9 @@ usage () {
   exit 1;
 }
 
-file_line () {
-  local FILE=$1
-  local LINE=$2
-
-  echo -n "$FILE:$LINE "
-  head -n $LINE $FILE | tail -1
-}
-
 error () {
-  echo "git-fresh: Error on line $1"
-  file_line $SCRIPT $1
+  echo -n "[Error] [$SCRIPT:$1] "
+  head -n $1 $SCRIPT | tail -1
 }
 
 trap 'error $LINENO' ERR
