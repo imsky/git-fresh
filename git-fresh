@@ -18,6 +18,7 @@ file_line () {
   local FILE=$1
   local LINE=$2
 
+  echo -n "$FILE:$LINE "
   head -n $LINE $FILE | tail -1
 }
 
