@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+SCRIPT=$(basename $(readlink -f $0))
+
 usage () {
   echo "Usage: git fresh [-fmrsF] [remote] [root]"
   echo "-f: Delete stale local and remote branches"
@@ -12,9 +14,9 @@ usage () {
   exit 1;
 }
 
-#todo: output error line
 error () {
-  echo "git-fresh: Error on line $1"
+  echo -n "[Error] [$SCRIPT:$1] "
+  head -n $1 $SCRIPT | tail -1
 }
 
 trap 'error $LINENO' ERR
