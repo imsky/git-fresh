@@ -2,10 +2,12 @@
 
 Keep your repo fresh with one command.
 
+* Stashes your unstaged changes
 * Updates local master to match remote, prunes stale branches
 * Deletes stale local and remote branches with `-f` flag
 * Merges remote master into current branch with `-m` flag
 * Rebases current branch against remote master with `-r` flag
+* Restores your stashed changes with `-s` flag
 * Wipes the slate clean with `-F` flag
 
 ## Usage
