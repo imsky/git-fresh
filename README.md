@@ -25,8 +25,15 @@ root: root branch, master by default
 
 ## Installation
 
+### Manual
+
 1. Clone or download
-2. `sudo make install`
+2. `cd git-fresh`
+3. `sudo make install`
+
+### Package
+
+* [bpkg](http://www.bpkg.io/): `bpkg install imsky/git-fresh`
 
 ## License
 
