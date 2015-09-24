@@ -2,23 +2,20 @@
 
 Keep your repo fresh with one command.
 
-* Stashes your unstaged changes
-* Updates local master to match remote, prunes stale branches
-* Deletes stale local and remote branches with `-f` flag
-* Merges remote master into current branch with `-m` flag
-* Rebases current branch against remote master with `-r` flag
-* Restores your stashed changes with `-s` flag
-* Wipes the slate clean with `-F` flag
-
 ## Usage
 
 ```
-Usage: git fresh [-fmrsF] [remote] [root]
+Usage: git fresh [-fmrF] [-sl] [remote] [root]
+By default, git-fresh will stash changes and prune remote branches.
+
 -f: Delete stale local and remote branches
 -m: Merge remote root into current branch
 -r: Rebase current branch against remote root
--s: Apply stashed changes after run
 -F: Reset local root to remote root, wipe workspace
+
+-s: Apply stashed changes after run
+-l: Only delete local stale branches
+
 remote: remote name, origin by default
 root: root branch, master by default
 ```
