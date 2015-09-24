@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
 
 usage () {
-  echo "Usage: git fresh [-fmrsF] [remote] [root]"
-  echo "-f: Delete stale local and remote branches"
-  echo "-m: Merge remote root into current branch"
-  echo "-r: Rebase current branch against remote root"
-  echo "-s: Apply stashed changes after run"
-  echo "-F: Reset local root to remote root, wipe workspace"
-  echo "remote: remote name, origin by default"
-  echo "root: root branch, master by default"
-  exit 1;
+cat << EOD
+Usage: git fresh [-fmrF] [-sl] [remote] [root]
+By default, git-fresh will stash changes and prune remote branches.
+
+-f: Delete stale local and remote branches
+-m: Merge remote root into current branch
+-r: Rebase current branch against remote root
+-F: Reset local root to remote root, wipe workspace
+
+-s: Apply stashed changes after run
+-l: Only delete local stale branches
+
+remote: remote name, origin by default
+root: root branch, master by default
+EOD
+
+exit 1;
 }
 
 error () {
@@ -18,7 +26,7 @@ error () {
 
 trap 'error $LINENO' ERR
 
-while getopts "fmrsF" opt; do
+while getopts "fmrslF" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
@@ -31,6 +39,9 @@ while getopts "fmrsF" opt; do
       ;;
     s)
       APPLY_STASH=true
+      ;;
+    l)
+      DELETE_ONLY_LOCAL=true
       ;;
     F)
       FORCE_LOCAL_RESET=true
@@ -85,8 +96,10 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
 
   if [[ ! -z "${REMOTE_STALE// }" ]]; then
     STALE_BRANCHES=true
-    if [[ "$FORCE_DELETE_STALE" = true ]]; then
-      echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
+    if [[ "$FORCE_DELETE_STALE" = true]]; then
+      if [[ "$DELETE_ONLY_LOCAL" != true]]; then
+        echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
+      fi
     else
       echo "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
     fi
