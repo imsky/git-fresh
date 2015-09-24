@@ -96,8 +96,8 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
 
   if [[ ! -z "${REMOTE_STALE// }" ]]; then
     STALE_BRANCHES=true
-    if [[ "$FORCE_DELETE_STALE" = true]]; then
-      if [[ "$DELETE_ONLY_LOCAL" != true]]; then
+    if [[ "$FORCE_DELETE_STALE" = true ]]; then
+      if [[ "$DELETE_ONLY_LOCAL" != true ]]; then
         echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
       fi
     else
@@ -105,7 +105,7 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
     fi
   fi
 
-  if [[ "$FORCE_DELETE_STALE" != true && $STALE_BRANCHES = true ]]; then
+  if [[ "$FORCE_DELETE_STALE" != true && "$STALE_BRANCHES" = true ]]; then
     echo "Delete stale branches with: git fresh -f"
   fi
 fi
