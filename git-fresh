@@ -17,7 +17,7 @@ remote: remote name, origin by default
 root: root branch, master by default
 EOD
 
-exit 1;
+exit 0;
 }
 
 error () {
@@ -66,6 +66,8 @@ STASH_STAMP=git-fresh-$(date +%s)
 if ! git diff-files --quiet; then
   git stash save $STASH_STAMP
 fi
+
+git rebase $REMOTE $CURRENT
 
 git checkout $ROOT > /dev/null 2>&1
 
