@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-cp git-fresh /usr/local/bin
+INSTALL_DIR=${INSTALL_DIR:-/usr/local/bin}
+
+cp git-fresh $INSTALL_DIR
+[ -e $INSTALL_DIR/git-fresh ] && echo git-fresh installed in $INSTALL_DIR

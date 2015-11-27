@@ -29,7 +29,7 @@ root: root branch, master by default
 
 1. Clone or download
 2. `cd git-fresh`
-3. `sudo make install`
+3. `sudo ./install`
 
 ### Package
 
