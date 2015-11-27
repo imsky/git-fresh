@@ -29,7 +29,7 @@ error () {
 
 trap 'error $LINENO' ERR
 
-while getopts "fmrslF" opt; do
+while getopts ":fmrslF" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
@@ -51,6 +51,7 @@ while getopts "fmrslF" opt; do
       ;;
     *)
       usage
+      break
       ;;
   esac
 done
