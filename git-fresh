@@ -3,7 +3,10 @@
 usage () {
 cat << EOD
 Usage: git fresh [-fmrF] [-sl] [remote] [root]
-By default, git-fresh will stash changes and prune remote branches.
+By default, git-fresh will:
+ - rebase against remote current branch 
+ - stash changes
+ - prune remote branches
 
 -f: Delete stale local and remote branches
 -m: Merge remote root into current branch
@@ -17,7 +20,7 @@ remote: remote name, origin by default
 root: root branch, master by default
 EOD
 
-exit 1;
+exit 0;
 }
 
 error () {
@@ -26,7 +29,7 @@ error () {
 
 trap 'error $LINENO' ERR
 
-while getopts "fmrslF" opt; do
+while getopts ":fmrslF" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
@@ -48,6 +51,7 @@ while getopts "fmrslF" opt; do
       ;;
     *)
       usage
+      break
       ;;
   esac
 done
@@ -66,6 +70,8 @@ STASH_STAMP=git-fresh-$(date +%s)
 if ! git diff-files --quiet; then
   git stash save $STASH_STAMP
 fi
+
+git rebase $REMOTE $CURRENT
 
 git checkout $ROOT > /dev/null 2>&1
 

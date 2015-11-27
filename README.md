@@ -6,7 +6,10 @@ Keep your repo fresh with one command.
 
 ```
 Usage: git fresh [-fmrF] [-sl] [remote] [root]
-By default, git-fresh will stash changes and prune remote branches.
+By default, git-fresh will:
+ - rebase against remote current branch
+ - stash changes
+ - prune remote branches
 
 -f: Delete stale local and remote branches
 -m: Merge remote root into current branch
