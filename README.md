@@ -33,6 +33,7 @@ root: root branch, master by default
 
 ### Package
 
+* [Homebrew](http://brew.sh/): `brew install git-fresh`
 * [bpkg](http://www.bpkg.io/): `bpkg install imsky/git-fresh`
 
 ## License
