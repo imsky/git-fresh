@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# git-fresh
+# https://github.com/imsky/git-fresh
+# By Ivan Malopinsky - http://imsky.co
+# MIT License
+
 usage () {
 cat << EOD
 Usage: git fresh [-fmrF] [-sl] [remote] [root]
@@ -20,11 +25,17 @@ remote: remote name, origin by default
 root: root branch, master by default
 EOD
 
-exit 0;
+exit 0
 }
 
 error () {
-  echo -n "[git-fresh] error on line $1"
+  echo "[git-fresh] error on line $1"
+  exit 1
+}
+
+die () {
+  echo "[git-fresh] $@" 1>&2
+  exit 1
 }
 
 trap 'error $LINENO' ERR
@@ -57,6 +68,9 @@ while getopts ":fmrslF" opt; do
 done
 
 shift $((OPTIND-1))
+
+[[ ! -e .git ]] && die "Not a git repository"
+[[ $(ls -l .git/refs/heads | wc -l) -eq "1" ]] && die "No HEAD ref available"
 
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
