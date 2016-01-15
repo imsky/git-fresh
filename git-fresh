@@ -69,7 +69,12 @@ done
 
 shift $((OPTIND-1))
 
-[[ ! -e .git ]] && die "Not a git repository"
+INSIDE_GIT_REPO=$(git rev-parse --is-inside-work-tree 2> /dev/null)
+
+if [[ -z "$INSIDE_GIT_REPO" ]]; then
+  dir "Not a git repository"
+fi
+
 [[ $(ls -l .git/refs/heads | wc -l) -eq "1" ]] && die "No HEAD ref available"
 
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
