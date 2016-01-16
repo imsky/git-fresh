@@ -75,7 +75,9 @@ if [[ -z "$INSIDE_GIT_REPO" ]]; then
   dir "Not a git repository"
 fi
 
-[[ $(ls -l .git/refs/heads | wc -l) -eq "1" ]] && die "No HEAD ref available"
+TOP_LEVEL_DIRECTORY=$(git rev-parse --show-toplevel)
+
+[[ $(ls -l "$TOP_LEVEL_DIRECTORY/.git/refs/heads" | wc -l) -eq "1" ]] && die "No HEAD ref available"
 
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
