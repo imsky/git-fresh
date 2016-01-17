@@ -92,7 +92,11 @@ if ! git diff-files --quiet; then
   git stash save $STASH_STAMP
 fi
 
-git rebase $REMOTE $CURRENT
+REMOTE_CURRENT=$(git ls-remote --heads 2> /dev/null | grep "heads/$CURRENT$" | cat)
+
+if [[ ! -z "$REMOTE_CURRENT" ]]; then
+  git rebase $REMOTE $CURRENT
+fi
 
 git checkout $ROOT > /dev/null 2>&1
 
