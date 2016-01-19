@@ -69,11 +69,15 @@ done
 
 shift $((OPTIND-1))
 
+# Are we inside a git repository?
+
 INSIDE_GIT_REPO=$(git rev-parse --is-inside-work-tree 2> /dev/null)
 
 if [[ -z "$INSIDE_GIT_REPO" ]]; then
   dir "Not a git repository"
 fi
+
+# Are we in a non-empty git repository?
 
 TOP_LEVEL_DIRECTORY=$(git rev-parse --show-toplevel)
 
@@ -83,20 +87,28 @@ CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
 
+# Update remotes and prune stale remotes
+
 git remote update
 git remote prune $REMOTE
 
 STASH_STAMP=git-fresh-$(date +%s)
 
+# Stash changed files
+
 if ! git diff-files --quiet; then
   git stash save $STASH_STAMP
 fi
 
-REMOTE_CURRENT=$(git ls-remote --heads 2> /dev/null | grep "heads/$CURRENT$" | cat)
+# If the current branch exists on the remote, rebase against it
+
+REMOTE_CURRENT=$(git ls-remote $REMOTE --heads 2> /dev/null | grep "heads/$CURRENT$" | cat)
 
 if [[ ! -z "$REMOTE_CURRENT" ]]; then
   git rebase $REMOTE $CURRENT
 fi
+
+# Switch to root branch (master)
 
 git checkout $ROOT > /dev/null 2>&1
 
@@ -106,6 +118,8 @@ if [[ "$FORCE_LOCAL_RESET" = true ]]; then
 else
   git rebase -q $REMOTE/$ROOT
 fi
+
+# Compute stale branches
 
 SMART_STALE=$(git branch -a --merged | tr -d "\* " | grep -Ev ">|$ROOT" | cat)
 
