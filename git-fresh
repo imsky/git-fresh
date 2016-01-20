@@ -28,14 +28,17 @@ EOD
 exit 0
 }
 
-error () {
-  echo "[git-fresh] error on line $1"
-  exit 1
+say () {
+  echo "[git-fresh] $@" 1>&2
 }
 
 die () {
-  echo "[git-fresh] $@" 1>&2
+  say $@
   exit 1
+}
+
+error () {
+  die "error on line $1"
 }
 
 trap 'error $LINENO' ERR
@@ -74,7 +77,7 @@ shift $((OPTIND-1))
 INSIDE_GIT_REPO=$(git rev-parse --is-inside-work-tree 2> /dev/null)
 
 if [[ -z "$INSIDE_GIT_REPO" ]]; then
-  dir "Not a git repository"
+  die "Not a git repository"
 fi
 
 # Are we in a non-empty git repository?
@@ -135,7 +138,7 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
       echo -n $LOCAL_STALE | xargs git branch -d 2> /dev/null
     else
-      echo "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
+      say "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
     fi
   fi
 
@@ -146,12 +149,12 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
         echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
       fi
     else
-      echo "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
+      say "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
     fi
   fi
 
   if [[ "$FORCE_DELETE_STALE" != true && "$STALE_BRANCHES" = true ]]; then
-    echo "Delete stale branches with: git fresh -f"
+    say "Delete stale branches with: git fresh -f"
   fi
 fi
 
@@ -159,7 +162,7 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   git checkout $CURRENT 2> /dev/null
 
   if [ "$REBASE" = true ] && [ "$MERGE" = true ]; then
-    echo "Rebase and merge enabled, skipping both"
+    say "Rebase and merge enabled, skipping both"
   else
     if [[ "$REBASE" = true ]]; then
       git rebase $REMOTE/$ROOT
@@ -177,7 +180,7 @@ if [[ ! -z $(git stash list | grep $STASH_STAMP | cat) ]]; then
   if [[ "$APPLY_STASH" = true ]]; then
     git stash pop
   else
-    echo "Stashed changes present, apply with: git stash pop"
+    say "Stashed changes present, apply with: git stash pop"
   fi
 fi
 
