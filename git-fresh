@@ -16,6 +16,7 @@ By default, git-fresh will:
 -f: Delete stale local and remote branches
 -m: Merge remote root into current branch
 -r: Rebase current branch against remote root
+-t: Remove local tags that do not exist on remote
 -F: Reset local root to remote root, wipe workspace
 
 -s: Apply stashed changes after run
@@ -43,7 +44,7 @@ error () {
 
 trap 'error $LINENO' ERR
 
-while getopts ":fmrslF" opt; do
+while getopts ":fmrtslF" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
@@ -53,6 +54,9 @@ while getopts ":fmrslF" opt; do
       ;;
     r)
       REBASE=true
+      ;;
+    t)
+      TAGS=true
       ;;
     s)
       APPLY_STASH=true
@@ -158,6 +162,8 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
   fi
 fi
 
+# Rebase or merge remote root against local branch
+
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   git checkout $CURRENT 2> /dev/null
 
@@ -175,6 +181,22 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
 else
   echo "$CURRENT branch was stale, staying on $ROOT"
 fi
+
+# Remove local tags that are missing on the remote
+
+if [[ "$TAGS" = true ]]; then
+  REMOTE_TAGS=$(git ls-remote --tags $REMOTE | cut -f 2)
+  LOCAL_TAGS=$(git show-ref --tags | cut -d' ' -f 2)
+
+  for tag in $LOCAL_TAGS; do
+    if [[ -z $(grep $tag <<< "$REMOTE_TAGS" | cat) ]]; then
+      MISSING_TAG="${tag//refs\/tags\/}"
+      git tag -d $MISSING_TAG
+    fi
+  done
+fi
+
+# Restore stashed changes
 
 if [[ ! -z $(git stash list | grep $STASH_STAMP | cat) ]]; then
   if [[ "$APPLY_STASH" = true ]]; then
