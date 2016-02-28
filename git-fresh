@@ -7,7 +7,7 @@
 
 usage () {
 cat << EOD
-Usage: git fresh [-fmrF] [-sl] [remote] [root]
+Usage: git fresh [-fmrtF] [-sl] [remote] [root]
 By default, git-fresh will:
  - rebase against remote current branch 
  - stash changes
