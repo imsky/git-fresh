@@ -140,7 +140,7 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
   if [[ ! -z "${LOCAL_STALE// }" ]]; then
     STALE_BRANCHES=true
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
-      echo -n $LOCAL_STALE | xargs git branch -d 2> /dev/null
+      echo -n $LOCAL_STALE | xargs -0 git branch -d 2> /dev/null
     else
       say "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
     fi
@@ -150,7 +150,7 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
     STALE_BRANCHES=true
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
       if [[ "$DELETE_ONLY_LOCAL" != true ]]; then
-        echo -n $REMOTE_STALE | xargs git push $REMOTE --delete
+        echo -n $REMOTE_STALE | xargs -0 git push $REMOTE --delete
       fi
     else
       say "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
