@@ -88,16 +88,15 @@ fi
 
 TOP_LEVEL_DIRECTORY=$(git rev-parse --show-toplevel)
 
-[[ $(ls -l "$TOP_LEVEL_DIRECTORY/.git/refs/heads" | wc -l) -eq "1" ]] && die "No HEAD ref available"
+[[ $(ls -1 "$TOP_LEVEL_DIRECTORY/.git/refs/heads" | wc -l | xargs) -eq "0" ]] && die "No HEAD ref available"
 
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
 
-# Update remotes and prune stale remotes
-
-git remote update
-git remote prune $REMOTE
+if [[ $(git remote -v | wc -l) -gt "0" ]]; then
+  REMOTES=true
+fi
 
 STASH_STAMP=git-fresh-$(date +%s)
 
@@ -106,6 +105,13 @@ STASH_STAMP=git-fresh-$(date +%s)
 if ! git diff-files --quiet; then
   git stash save $STASH_STAMP
 fi
+
+if [[ $REMOTES = true ]]; then
+
+# Update remotes and prune stale remotes
+  git remote update
+  git remote prune $REMOTE
+
 
 # If the current branch exists on the remote, rebase against it
 
@@ -121,9 +127,11 @@ git checkout $ROOT > /dev/null 2>&1
 
 if [[ "$FORCE_LOCAL_RESET" = true ]]; then
   git clean -dfx
-  git reset --hard $REMOTE/$ROOT
+  git reset --hard $REMOTE $ROOT
 else
-  git rebase -q $REMOTE/$ROOT
+  git rebase -q $REMOTE $ROOT
+fi
+
 fi
 
 # Compute stale branches
