@@ -39,7 +39,7 @@ die () {
 }
 
 error () {
-  die "error on line $1"
+  die "Error on line $1: $(head -n $1 $0 | tail -1)"
 }
 
 trap 'error $LINENO' ERR
@@ -108,29 +108,33 @@ fi
 
 if [[ $REMOTES = true ]]; then
 
-# Update remotes and prune stale remotes
-  git remote update
-  git remote prune $REMOTE
+  # Update remotes and prune stale remotes
+    git remote update
+    git remote prune $REMOTE
 
 
-# If the current branch exists on the remote, rebase against it
+  # If the current branch exists on the remote, rebase against it
 
-REMOTE_CURRENT=$(git ls-remote $REMOTE --heads 2> /dev/null | grep "heads/$CURRENT$" | cat)
+  REMOTE_CURRENT=$(git ls-remote $REMOTE --heads 2> /dev/null | grep "heads/$CURRENT$" | cat)
 
-if [[ ! -z "$REMOTE_CURRENT" ]]; then
-  git rebase $REMOTE $CURRENT
+  if [[ ! -z "$REMOTE_CURRENT" ]]; then
+    git rebase $REMOTE $CURRENT
+  fi
+
 fi
 
 # Switch to root branch (master)
 
 git checkout $ROOT > /dev/null 2>&1
 
-if [[ "$FORCE_LOCAL_RESET" = true ]]; then
-  git clean -dfx
-  git reset --hard $REMOTE $ROOT
-else
-  git rebase -q $REMOTE $ROOT
-fi
+if [[ $REMOTES = true ]]; then
+
+  if [[ "$FORCE_LOCAL_RESET" = true ]]; then
+    git clean -dfx
+    git reset --hard $REMOTE $ROOT
+  else
+    git rebase -q $REMOTE $ROOT
+  fi
 
 fi
 
@@ -178,12 +182,14 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   if [ "$REBASE" = true ] && [ "$MERGE" = true ]; then
     say "Rebase and merge enabled, skipping both"
   else
-    if [[ "$REBASE" = true ]]; then
-      git rebase $REMOTE/$ROOT
-    fi
+    if [[ "$REMOTES" = true ]]; then
+      if [[ "$REBASE" = true ]]; then
+        git rebase $REMOTE $ROOT
+      fi
 
-    if [[ "$MERGE" = true ]]; then
-      git merge --no-edit $REMOTE/$ROOT
+      if [[ "$MERGE" = true ]]; then
+        git merge --no-edit $REMOTE $ROOT
+      fi
     fi
   fi
 else

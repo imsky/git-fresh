@@ -4,5 +4,5 @@
   "description": "Utility to keep Git repositories fresh",
   "global": true,
   "repo": "imsky/git-fresh",
-  "install": "sudo ./install"
+  "install": "sudo ./install.sh"
 }
