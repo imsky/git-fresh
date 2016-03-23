@@ -44,7 +44,7 @@ error () {
 
 trap 'error $LINENO' ERR
 
-while getopts ":fmrtslF" opt; do
+while getopts ":fmrtslFT" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
@@ -67,6 +67,9 @@ while getopts ":fmrtslF" opt; do
     F)
       FORCE_LOCAL_RESET=true
       ;;
+    T)
+      TEST=true
+      ;;
     *)
       usage
       break
@@ -75,6 +78,22 @@ while getopts ":fmrtslF" opt; do
 done
 
 shift $((OPTIND-1))
+
+# Are we in testing mode?
+
+if [[ $TEST = true ]]; then
+
+PATH=$(pwd):$PATH
+TEST_DIR=/tmp/git-fresh-test
+
+mkdir -p $TEST_DIR; cd $TEST_DIR
+git init; touch test; git add test; git commit -am 'test'
+git checkout -b test; rm test; git commit -am 'delete test'
+git checkout master; git merge test; git checkout test
+git-fresh -fr; rm -rf $TEST_DIR
+exit 0
+
+fi
 
 # Are we inside a git repository?
 
