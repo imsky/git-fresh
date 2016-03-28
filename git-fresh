@@ -131,7 +131,6 @@ if [[ $REMOTES = true ]]; then
     git remote update
     git remote prune $REMOTE
 
-
   # If the current branch exists on the remote, rebase against it
 
   REMOTE_CURRENT=$(git ls-remote $REMOTE --heads 2> /dev/null | grep "heads/$CURRENT$" | cat)
@@ -196,18 +195,18 @@ fi
 # Rebase or merge remote root against local branch
 
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
-  git checkout $CURRENT 2> /dev/null
+  git checkout $CURRENT
 
   if [ "$REBASE" = true ] && [ "$MERGE" = true ]; then
     say "Rebase and merge enabled, skipping both"
   else
     if [[ "$REMOTES" = true ]]; then
       if [[ "$REBASE" = true ]]; then
-        git rebase $REMOTE $ROOT
+        git rebase $ROOT
       fi
 
       if [[ "$MERGE" = true ]]; then
-        git merge --no-edit $REMOTE $ROOT
+        git merge --no-edit $ROOT
       fi
     fi
   fi
