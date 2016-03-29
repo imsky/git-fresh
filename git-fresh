@@ -149,9 +149,9 @@ if [[ $REMOTES = true ]]; then
 
   if [[ "$FORCE_LOCAL_RESET" = true ]]; then
     git clean -dfx
-    git reset --hard $REMOTE $ROOT
+    git reset --hard $REMOTE/$ROOT
   else
-    git rebase -q $REMOTE $ROOT
+    git rebase -q $REMOTE/$ROOT
   fi
 
 fi
