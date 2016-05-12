@@ -44,7 +44,7 @@ error () {
 
 trap 'error $LINENO' ERR
 
-while getopts ":fmrtslFT" opt; do
+while getopts ":fmrtslRWT" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
@@ -64,8 +64,11 @@ while getopts ":fmrtslFT" opt; do
     l)
       DELETE_ONLY_LOCAL=true
       ;;
-    F)
-      FORCE_LOCAL_RESET=true
+    R)
+      RESET_ROOT=true
+      ;;
+    W)
+      WIPE_WORKSPACE=true
       ;;
     T)
       TEST=true
@@ -145,15 +148,22 @@ fi
 
 git checkout $ROOT > /dev/null 2>&1
 
+# Wipe workspace?
+
+if [[ $WIPE_WORKSPACE = true ]]; then
+  git clean -dfx
+fi
+
+# Reset root?
+
 if [[ $REMOTES = true ]]; then
-
-  if [[ "$FORCE_LOCAL_RESET" = true ]]; then
-    git clean -dfx
+  if [[ $RESET_ROOT = true ]]; then
     git reset --hard $REMOTE/$ROOT
-  else
-    git rebase -q $REMOTE/$ROOT
   fi
+fi
 
+if [[ $REMOTES = true ]]; then
+  git rebase -q $REMOTE/$ROOT
 fi
 
 # Compute stale branches
