@@ -5,7 +5,7 @@ Keep your repo fresh with one command.
 ## Usage
 
 ```
-Usage: git fresh [-fmrtF] [-sl] [remote] [root]
+Usage: git fresh [-fmrtRW] [-sl] [remote] [root]
 By default, git-fresh will:
  - rebase against remote current branch 
  - stash changes
@@ -15,7 +15,8 @@ By default, git-fresh will:
 -m: Merge remote root into current branch
 -r: Rebase current branch against remote root
 -t: Remove local tags that do not exist on remote
--F: Reset local root to remote root, wipe workspace
+-R: Reset local root to remote root
+-W: Wipe workspace clean
 
 -s: Apply stashed changes after run
 -l: Only delete local stale branches
