@@ -9,7 +9,7 @@ usage () {
 cat << EOD
 Usage: git fresh [-fmrtRW] [-sl] [remote] [root]
 By default, git-fresh will:
- - rebase against remote current branch 
+ - rebase against remote current branch
  - stash changes
  - prune remote branches
 
@@ -22,6 +22,8 @@ By default, git-fresh will:
 
 -s: Apply stashed changes after run
 -l: Only delete local stale branches
+
+-v: Print git-fresh version and exit
 
 remote: remote name, origin by default
 root: root branch, master by default
@@ -45,7 +47,7 @@ error () {
 
 trap 'error $LINENO' ERR
 
-while getopts ":fmrtslRWT" opt; do
+while getopts ":fmrtslRWTv" opt; do
   case $opt in
     f)
       FORCE_DELETE_STALE=true
@@ -74,6 +76,9 @@ while getopts ":fmrtslRWT" opt; do
     T)
       TEST=true
       ;;
+    v)
+      VERSION=1.7.0
+      ;;
     *)
       usage
       break
@@ -82,6 +87,14 @@ while getopts ":fmrtslRWT" opt; do
 done
 
 shift $((OPTIND-1))
+
+# Are we in version mode?
+
+if [[ ! -z $VERSION ]]; then
+echo git-fresh $VERSION
+exit 0
+
+fi
 
 # Are we in testing mode?
 
