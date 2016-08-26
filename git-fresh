@@ -102,12 +102,21 @@ if [[ $TEST = true ]]; then
 
 PATH=$(pwd):$PATH
 TEST_DIR=/tmp/git-fresh-test
+fail_test () {
+  echo 'Tests failed!'
+  rm -rf $TEST_DIR
+  exit 1
+}
 
-mkdir -p $TEST_DIR; cd $TEST_DIR
+rm -rf $TEST_DIR; mkdir -p $TEST_DIR; cd $TEST_DIR
 git init; touch test; git add test; git commit -am 'test'
 git checkout -b test; rm test; git commit -am 'delete test'
 git checkout master; git merge test; git checkout test
-git-fresh -fr; rm -rf $TEST_DIR
+git-fresh -fr; git rev-parse --verify test && fail_test || true
+git checkout -b test; git checkout master; git-fresh; git checkout -
+git rev-parse --abbrev-ref HEAD | grep -q test || fail_test
+rm -rf $TEST_DIR
+echo 'Tests passed!'
 exit 0
 
 fi
@@ -158,9 +167,11 @@ if [[ $REMOTES = true ]]; then
 
 fi
 
-# Switch to root branch (master)
+# If we are not already on root branch, switch to root branch (master)
 
-git checkout $ROOT > /dev/null 2>&1
+if [[ "$ROOT" != "$CURRENT" ]]; then
+  git checkout $ROOT > /dev/null 2>&1
+fi
 
 # Wipe workspace?
 
@@ -219,7 +230,9 @@ fi
 # Rebase or merge remote root against local branch
 
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
-  git checkout $CURRENT
+  if [[ "$ROOT" != "$CURRENT" ]]; then
+    git checkout $CURRENT
+  fi
 
   if [ "$REBASE" = true ] && [ "$MERGE" = true ]; then
     say "Rebase and merge enabled, skipping both"
