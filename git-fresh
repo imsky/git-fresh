@@ -227,6 +227,12 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
   fi
 fi
 
+# Remove tracking information for missing upstreams
+
+if [[ ! -z $(git branch -vv | grep -F "[$REMOTE/$CURRENT: gone]") ]]; then
+  git branch --unset-upstream $CURRENT
+fi
+
 # Rebase or merge remote root against local branch
 
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
