@@ -7,9 +7,11 @@ Keep your repo fresh with one command.
 ```
 Usage: git fresh [-fmrtRW] [-sl] [remote] [root]
 By default, git-fresh will:
- - rebase against remote current branch 
+ - rebase against remote current branch
  - stash changes
  - prune remote branches
+
+git-fresh will ignore any branches listed in a .freshignore file.
 
 -f: Delete stale local and remote branches
 -m: Merge remote root into current branch
@@ -20,6 +22,8 @@ By default, git-fresh will:
 
 -s: Apply stashed changes after run
 -l: Only delete local stale branches
+
+-v: Print git-fresh version and exit
 
 remote: remote name, origin by default
 root: root branch, master by default

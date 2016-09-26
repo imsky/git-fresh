@@ -13,6 +13,8 @@ By default, git-fresh will:
  - stash changes
  - prune remote branches
 
+git-fresh will ignore any branches listed in a .freshignore file.
+
 -f: Delete stale local and remote branches
 -m: Merge remote root into current branch
 -r: Rebase current branch against remote root
@@ -77,7 +79,7 @@ while getopts ":fmrtslRWTv" opt; do
       TEST=true
       ;;
     v)
-      VERSION=1.8.0
+      VERSION=1.8.2
       ;;
     *)
       usage
@@ -142,6 +144,15 @@ ROOT=${2:-master}
 if [[ $(git remote -v | wc -l) -gt "0" ]]; then
   REMOTES=true
 fi
+
+# Is this branch in .freshignore?
+
+if [[ -f "$TOP_LEVEL_DIRECTORY/.freshignore" ]]; then
+    if [[ ! -z $(grep -Fx "$CURRENT" "$TOP_LEVEL_DIRECTORY/.freshignore") ]]; then
+        die "Branch $CURRENT is ignored"
+    fi
+fi
+
 
 STASH_STAMP=git-fresh-$(date +%s)
 
