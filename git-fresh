@@ -147,8 +147,10 @@ fi
 
 # Is this branch in .freshignore?
 
-if [[ -f "$TOP_LEVEL_DIRECTORY/.freshignore" ]]; then
-    if [[ ! -z $(grep -Fx "$CURRENT" "$TOP_LEVEL_DIRECTORY/.freshignore") ]]; then
+FRESH_IGNORE="$TOP_LEVEL_DIRECTORY/.freshignore"
+
+if [[ -f $FRESH_IGNORE ]]; then
+    if [[ ! -z $(grep -Fx "$CURRENT" "$FRESH_IGNORE") ]]; then
         die "Branch $CURRENT is ignored"
     fi
 fi
@@ -215,21 +217,37 @@ REMOTE_STALE=${REMOTE_STALE//remotes\/$REMOTE\/}
 if [[ ! -z "${SMART_STALE// }" ]]; then
   if [[ ! -z "${LOCAL_STALE// }" ]]; then
     STALE_BRANCHES=true
+    if [[ -f "$FRESH_IGNORE" ]]; then
+      LOCAL_STALE=$(echo -n $LOCAL_STALE | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " ")
+      if [[ -z $LOCAL_STALE ]]; then
+        STALE_BRANCHES=false
+      fi
+    fi
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
       echo -n $LOCAL_STALE | tr " " "\0" | xargs -0 git branch -d 2> /dev/null
     else
-      say "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
+      if [[ $STALE_BRANCHES = true ]]; then
+        say "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
+      fi
     fi
   fi
 
   if [[ ! -z "${REMOTE_STALE// }" ]]; then
     STALE_BRANCHES=true
+    if [[ -f "$FRESH_IGNORE" ]]; then
+      REMOTE_STALE=$(echo -n $REMOTE_STALE | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " ")
+      if [[ -z $REMOTE_STALE ]]; then
+        STALE_BRANCHES=false
+      fi
+    fi
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
       if [[ "$DELETE_ONLY_LOCAL" != true ]]; then
         echo -n $REMOTE_STALE | tr " " "\0" | xargs -0 git push $REMOTE --delete
       fi
     else
-      say "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
+      if [[ $STALE_BRANCHES = true ]]; then
+        say "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
+      fi
     fi
   fi
 
