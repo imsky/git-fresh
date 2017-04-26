@@ -134,12 +134,18 @@ fi
 # Are we in a non-empty git repository?
 
 TOP_LEVEL_DIRECTORY=$(git rev-parse --show-toplevel)
-
-[[ $(ls -1 "$TOP_LEVEL_DIRECTORY/.git/refs/heads" | wc -l | xargs) -eq "0" ]] && die "No HEAD ref available"
-
-CURRENT=$(git rev-parse --abbrev-ref HEAD)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
+
+if [[ $(ls -1 "$TOP_LEVEL_DIRECTORY/.git/refs/heads" | wc -l | xargs) -eq "0" ]]; then
+  if git rev-parse --verify "$ROOT"; then
+    git rev-parse "$ROOT" > "$TOP_LEVEL_DIRECTORY/.git/refs/heads/$ROOT"
+  else
+    (git fsck --lost-found &> /dev/null; git checkout "$ROOT") || die "No HEAD ref available"
+  fi
+fi
+
+CURRENT=$(git rev-parse --abbrev-ref HEAD)
 
 if [[ $(git remote -v | wc -l) -gt "0" ]]; then
   REMOTES=true
