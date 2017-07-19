@@ -96,34 +96,31 @@ shift $((OPTIND-1))
 # Are we in version mode?
 
 if [[ ! -z $VERSION ]]; then
-echo git-fresh $VERSION
-exit 0
-
+  echo git-fresh $VERSION
+  exit 0
 fi
 
 # Are we in testing mode?
 
 if [[ $TEST = true ]]; then
+  PATH=$(pwd):$PATH
+  TEST_DIR=/tmp/git-fresh-test
+  fail_test () {
+    echo 'Tests failed!'
+    rm -rf $TEST_DIR
+    exit 1
+  }
 
-PATH=$(pwd):$PATH
-TEST_DIR=/tmp/git-fresh-test
-fail_test () {
-  echo 'Tests failed!'
+  rm -rf $TEST_DIR; mkdir -p $TEST_DIR; cd $TEST_DIR
+  git init; touch test; git add test; git commit -am 'test'
+  git checkout -b test; rm test; git commit -am 'delete test'
+  git checkout master; git merge test; git checkout test
+  git-fresh -fr; git rev-parse --verify test && fail_test || true
+  git checkout -b test; git checkout master; git-fresh; git checkout -
+  git rev-parse --abbrev-ref HEAD | grep -q test || fail_test
   rm -rf $TEST_DIR
-  exit 1
-}
-
-rm -rf $TEST_DIR; mkdir -p $TEST_DIR; cd $TEST_DIR
-git init; touch test; git add test; git commit -am 'test'
-git checkout -b test; rm test; git commit -am 'delete test'
-git checkout master; git merge test; git checkout test
-git-fresh -fr; git rev-parse --verify test && fail_test || true
-git checkout -b test; git checkout master; git-fresh; git checkout -
-git rev-parse --abbrev-ref HEAD | grep -q test || fail_test
-rm -rf $TEST_DIR
-echo 'Tests passed!'
-exit 0
-
+  echo 'Tests passed!'
+  exit 0
 fi
 
 # Are we inside a git repository?
@@ -178,19 +175,17 @@ if ! git diff-files --quiet; then
 fi
 
 if [[ $REMOTES = true ]]; then
-
   # Update remotes and prune stale remotes
-    git remote update
-    git remote prune $REMOTE
+  git remote prune $REMOTE
+  git remote update $REMOTE
+  git remote prune $REMOTE
 
   # If the current branch exists on the remote, rebase against it
-
   REMOTE_CURRENT=$(git ls-remote $REMOTE --heads 2> /dev/null | grep "heads/$CURRENT$" | cat)
 
   if [[ ! -z "$REMOTE_CURRENT" ]]; then
     git rebase $REMOTE $CURRENT
   fi
-
 fi
 
 # If we are not already on root branch, switch to root branch (master)
