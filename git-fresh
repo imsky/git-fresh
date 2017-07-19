@@ -14,6 +14,9 @@ By default, git-fresh will:
  - prune remote branches
 
 git-fresh will ignore any branches listed in a .freshignore file.
+.freshignore should contain branch names you would like to ignore
+on separate lines. The file can exist in the current Git repo
+or in the home directory, i.e. ~/.freshignore.
 
 -f: Delete stale local and remote branches
 -m: Merge remote root into current branch
@@ -154,6 +157,10 @@ fi
 # Is this branch in .freshignore?
 
 FRESH_IGNORE="$TOP_LEVEL_DIRECTORY/.freshignore"
+
+if [[ ! -f $FRESH_IGNORE ]]; then
+  FRESH_IGNORE="~/.freshignore"
+fi
 
 if [[ -f $FRESH_IGNORE ]]; then
     if [[ ! -z $(grep -Fx "$CURRENT" "$FRESH_IGNORE") ]]; then

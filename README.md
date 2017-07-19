@@ -1,4 +1,4 @@
-# git-fresh :lemon: 
+# git-fresh :lemon:
 
 Keep your repo fresh with one command.
 
@@ -12,6 +12,9 @@ By default, git-fresh will:
  - prune remote branches
 
 git-fresh will ignore any branches listed in a .freshignore file.
+.freshignore should contain branch names you would like to ignore
+on separate lines. The file can exist in the current Git repo
+or in the home directory, i.e. ~/.freshignore.
 
 -f: Delete stale local and remote branches
 -m: Merge remote root into current branch
