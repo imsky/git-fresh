@@ -318,4 +318,7 @@ if [[ ! -z $(git stash list | grep $STASH_STAMP | cat) ]]; then
   fi
 fi
 
-git gc --auto --prune=now
+if ! git gc --auto --force; then
+  git prune
+  rm -rf "$TOP_LEVEL_DIRECTORY/.git/gc.log"
+fi
