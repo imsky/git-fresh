@@ -7,7 +7,7 @@ Keep your repo fresh with one command.
 ```
 Usage: git fresh [-fmrtRW] [-sl] [remote] [root]
 By default, git-fresh will:
- - rebase against remote current branch
+ - update local root (master) to match remote root
  - stash changes
  - prune remote branches
 
