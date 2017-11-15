@@ -176,16 +176,10 @@ fi
 
 if [[ $REMOTES = true ]]; then
   # Update remotes and prune stale remotes
+
   git remote prune $REMOTE
   git remote update $REMOTE
   git remote prune $REMOTE
-
-  # If the current branch exists on the remote, rebase against it
-  REMOTE_CURRENT=$(git ls-remote $REMOTE --heads 2> /dev/null | grep "heads/$CURRENT$" | cat)
-
-  if [[ ! -z "$REMOTE_CURRENT" ]]; then
-    git rebase $REMOTE $CURRENT
-  fi
 fi
 
 # If we are not already on root branch, switch to root branch (master)
@@ -200,16 +194,15 @@ if [[ $WIPE_WORKSPACE = true ]]; then
   git clean -dfx
 fi
 
-# Reset root?
-
 if [[ $REMOTES = true ]]; then
+
+  # Reset root?
+
   if [[ $RESET_ROOT = true ]]; then
     git reset --hard $REMOTE/$ROOT
   fi
-fi
 
-if [[ $REMOTES = true ]]; then
-  git rebase -q $REMOTE/$ROOT
+  git pull --quiet --ff-only $REMOTE $ROOT || say "Fast forward merge failed on $ROOT. You can reset local $ROOT by running git fresh -R."
 fi
 
 # Compute stale branches
