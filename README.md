@@ -34,11 +34,16 @@ root: root branch, master by default
 
 ## Installation
 
-### Manual
+### Manual on Linux or MacOSX
 
 1. Clone or download
 2. `cd git-fresh`
 3. `sudo ./install`
+
+### Manual on Windows
+
+Copy the file [git-fresh](https://raw.githubusercontent.com/imsky/git-fresh/master/git-fresh) to `usr\bin` in your git installation directory.
+This usually is `C:\Program Files\Git\usr\bin`.
 
 ### Package
 
