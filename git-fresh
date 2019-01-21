@@ -47,7 +47,8 @@ die () {
 }
 
 error () {
-  die "Error on line $1: $(head -n $1 $0 | tail -1)"
+  ERR=${ERR:-unknown}
+  die "Error on line $1: $ERR"
 }
 
 trap 'error $LINENO' ERR
@@ -132,11 +133,12 @@ if [[ -z "$INSIDE_GIT_REPO" ]]; then
 fi
 
 # Are we in a non-empty git repository?
-
+ERR="could not get top-level-directory"
 TOP_LEVEL_DIRECTORY=$(git rev-parse --show-toplevel)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
 
+# todo: remove this code since it's still possible to get a corrupt ref on macOS
 if [[ $(ls -1 "$TOP_LEVEL_DIRECTORY/.git/refs/heads" | wc -l | xargs) -eq "0" ]]; then
   if git rev-parse --verify "$ROOT"; then
     git rev-parse "$ROOT" > "$TOP_LEVEL_DIRECTORY/.git/refs/heads/$ROOT"
@@ -145,7 +147,9 @@ if [[ $(ls -1 "$TOP_LEVEL_DIRECTORY/.git/refs/heads" | wc -l | xargs) -eq "0" ]]
   fi
 fi
 
+ERR="could not get current commit"
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
+ERR=""
 
 if [[ $(git remote -v | wc -l) -gt "0" ]]; then
   REMOTES=true
@@ -171,12 +175,13 @@ STASH_STAMP=git-fresh-$(date +%s)
 # Stash changed files
 
 if ! git diff-files --quiet; then
+  ERR="could not stash changes"
   git stash save $STASH_STAMP
 fi
 
 if [[ $REMOTES = true ]]; then
   # Update remotes and prune stale remotes
-
+  ERR="could update and prune remotes"
   git remote prune $REMOTE
   git remote update $REMOTE
   git remote prune $REMOTE
@@ -185,28 +190,32 @@ fi
 # If we are not already on root branch, switch to root branch (master)
 
 if [[ "$ROOT" != "$CURRENT" ]]; then
+  ERR="could not check out $ROOT branch"
   git checkout $ROOT > /dev/null 2>&1
 fi
 
 # Wipe workspace?
 
 if [[ $WIPE_WORKSPACE = true ]]; then
+  ERR="could not wipe workspace"
   git clean -dfx
 fi
 
 if [[ $REMOTES = true ]]; then
-
   # Reset root?
 
   if [[ $RESET_ROOT = true ]]; then
+    ERR="could not reset root"
     git reset --hard $REMOTE/$ROOT
   fi
 
+  ERR="could not perform fast forward merge"
   git pull --quiet --ff-only $REMOTE $ROOT || say "Fast forward merge failed on $ROOT. You can reset local $ROOT by running git fresh -R."
 fi
 
 # Compute stale branches
 
+ERR="could not determine stale branches"
 SMART_STALE=$(git branch -a --merged | tr -d "\* " | grep -Ev ">|$ROOT" | cat)
 
 LOCAL_STALE=$(grep -Ev "^remotes/" <<< "$SMART_STALE" | cat)
@@ -225,6 +234,7 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
       fi
     fi
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
+      ERR="could not delete stale local branches: $LOCAL_STALE"
       echo -n $LOCAL_STALE | tr " " "\0" | xargs -0 git branch -d 2> /dev/null
     else
       if [[ $STALE_BRANCHES = true ]]; then
@@ -243,6 +253,7 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
     fi
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
       if [[ "$DELETE_ONLY_LOCAL" != true ]]; then
+        ERR="could not delete stale remote branches: $REMOTE_STALE"
         echo -n $REMOTE_STALE | tr " " "\0" | xargs -0 git push $REMOTE --delete
       fi
     else
@@ -267,6 +278,7 @@ fi
 
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   if [[ "$ROOT" != "$CURRENT" ]]; then
+    ERR="could not check out $CURRENT branch"
     git checkout $CURRENT
   fi
 
@@ -275,10 +287,12 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   else
     if [[ "$REMOTES" = true ]]; then
       if [[ "$REBASE" = true ]]; then
+        ERR="could not rebase against $ROOT branch"
         git rebase $ROOT
       fi
 
       if [[ "$MERGE" = true ]]; then
+        ERR="could not merge $ROOT branch"
         git merge --no-edit $ROOT
       fi
     fi
@@ -290,6 +304,7 @@ fi
 # Remove local tags that are missing on the remote
 
 if [[ "$TAGS" = true ]]; then
+  ERR="could not get remote tags"
   REMOTE_TAGS=$(git ls-remote --tags $REMOTE | cut -f 2)
   LOCAL_TAGS=$(git show-ref --tags | cut -d' ' -f 2)
 
@@ -305,6 +320,7 @@ fi
 
 if [[ ! -z $(git stash list | grep $STASH_STAMP | cat) ]]; then
   if [[ "$APPLY_STASH" = true ]]; then
+    ERR="could not apply stash"
     git stash pop
   else
     say "Stashed changes present, apply with: git stash pop"
@@ -312,6 +328,9 @@ if [[ ! -z $(git stash list | grep $STASH_STAMP | cat) ]]; then
 fi
 
 if ! git gc --auto --force; then
+  ERR="git prune failed"
   git prune
   rm -rf "$TOP_LEVEL_DIRECTORY/.git/gc.log"
 fi
+
+ERR=""
