@@ -44,7 +44,7 @@ OPTIONS
 
 1. Clone or download
 2. `cd git-fresh`
-3. `sudo ./install`
+3. `sudo ./install.sh`
 
 ### Manual on Windows
 
