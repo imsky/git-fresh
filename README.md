@@ -7,6 +7,7 @@ Keep your repo fresh with one command.
 ```
 SYNOPSIS
   git-fresh [-fmrtRWS] [-sl] [remote] [root]
+
 DESCRIPTION
   git-fresh helps keep your Git repo fresh.
 
@@ -21,6 +22,7 @@ DESCRIPTION
   or in the home directory, i.e. ~/.freshignore.
 
   remote is origin by default. root is master by default.
+
 OPTIONS
   -f  Delete stale local and remote branches
   -m  Merge remote root into current branch
