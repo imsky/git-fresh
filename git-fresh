@@ -23,7 +23,7 @@ DESCRIPTION
   - prune remote branches
 
   git-fresh will ignore any branches listed in a .freshignore file.
-  .freshignore should contain branch names you would like to ignore
+  freshignore should contain branch names you would like to ignore
   on separate lines. The file can exist in the current Git repo
   or in the home directory, i.e. ~/.freshignore.
 
