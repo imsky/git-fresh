@@ -54,6 +54,10 @@ error () {
 
 trap 'error $LINENO' ERR
 
+if [[ "$1" = '--help' ]]; then
+  usage
+fi
+
 while getopts ":fmrtslRWSTv" opt; do
   case $opt in
     f)
@@ -185,7 +189,7 @@ fi
 
 if [[ $REMOTES = true ]]; then
   # Update remotes and prune stale remotes
-  ERR="could update and prune remotes"
+  ERR="could not update and prune remotes"
   git remote prune $REMOTE
   git remote update $REMOTE
   git remote prune $REMOTE
