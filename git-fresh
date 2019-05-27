@@ -161,10 +161,6 @@ TOP_LEVEL_DIRECTORY=$(git rev-parse --show-toplevel)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
 
-ERR="could not get current commit"
-CURRENT=$(git rev-parse --abbrev-ref HEAD)
-ERR=""
-
 # Recover the root HEAD if it is missing or corrupt (e.g. master head reads "master")
 recover_root () {
   ROOT_HEAD_FILE="$TOP_LEVEL_DIRECTORY/.git/refs/heads/$ROOT"
@@ -177,7 +173,7 @@ recover_root () {
     MISSING_ROOT_HEAD=true
   fi
 
-  if [[ $CORRUPT_ROOT_HEAD=true ||  $MISSING_ROOT_HEAD=true ]]; then
+  if [[ "$CORRUPT_ROOT_HEAD" = "true" || "$MISSING_ROOT_HEAD" = "true" ]]; then
     ERR="failed to recover $ROOT HEAD"
     RECOVERED_ROOT_HEAD=$(cat "$TOP_LEVEL_DIRECTORY/.git/logs/refs/heads/$ROOT" | tail -n1 | cut -d' ' -f1)
     echo "$RECOVERED_ROOT_HEAD" > "$ROOT_HEAD_FILE"
@@ -186,6 +182,10 @@ recover_root () {
 }
 
 recover_root
+
+ERR="could not get current commit"
+CURRENT=$(git rev-parse --abbrev-ref HEAD)
+ERR=""
 
 if [[ $(git remote -v | wc -l) -gt "0" ]]; then
   REMOTES=true
