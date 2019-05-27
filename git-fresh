@@ -161,18 +161,31 @@ TOP_LEVEL_DIRECTORY=$(git rev-parse --show-toplevel)
 REMOTE=${1:-origin}
 ROOT=${2:-master}
 
-# todo: remove this code since it's still possible to get a corrupt ref on macOS
-if [[ $(ls -1 "$TOP_LEVEL_DIRECTORY/.git/refs/heads" | wc -l | xargs) -eq "0" ]]; then
-  if git rev-parse --verify "$ROOT"; then
-    git rev-parse "$ROOT" > "$TOP_LEVEL_DIRECTORY/.git/refs/heads/$ROOT"
-  else
-    (git fsck --lost-found &> /dev/null; git checkout "$ROOT") || die "No HEAD ref available"
-  fi
-fi
-
 ERR="could not get current commit"
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 ERR=""
+
+# Recover the root HEAD if it is missing or corrupt (e.g. master head reads "master")
+recover_root () {
+  ROOT_HEAD_FILE="$TOP_LEVEL_DIRECTORY/.git/refs/heads/$ROOT"
+
+  if [[ -e "$ROOT_HEAD_FILE" ]]; then
+    if [[ $(cat "$ROOT_HEAD_FILE") = $(echo $ROOT) ]]; then
+      CORRUPT_ROOT_HEAD=true
+    fi
+  else
+    MISSING_ROOT_HEAD=true
+  fi
+
+  if [[ $CORRUPT_ROOT_HEAD=true ||  $MISSING_ROOT_HEAD=true ]]; then
+    ERR="failed to recover $ROOT HEAD"
+    RECOVERED_ROOT_HEAD=$(cat "$TOP_LEVEL_DIRECTORY/.git/logs/refs/heads/$ROOT" | tail -n1 | cut -d' ' -f1)
+    echo "$RECOVERED_ROOT_HEAD" > "$ROOT_HEAD_FILE"
+    say "Recovered $ROOT HEAD, set to $RECOVERED_ROOT_HEAD"
+  fi
+}
+
+recover_root
 
 if [[ $(git remote -v | wc -l) -gt "0" ]]; then
   REMOTES=true
@@ -191,7 +204,6 @@ if [[ -f $FRESH_IGNORE ]]; then
         die "Branch $CURRENT is ignored"
     fi
 fi
-
 
 STASH_STAMP=git-fresh-$(date +%s)
 
@@ -303,6 +315,7 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   if [[ "$ROOT" != "$CURRENT" ]]; then
     ERR="could not check out $CURRENT branch"
     git checkout $CURRENT
+    recover_root
   fi
 
   if [ "$REBASE" = true ] && [ "$MERGE" = true ]; then
@@ -362,5 +375,7 @@ if ! git gc --auto --force; then
   git prune
   rm -rf "$TOP_LEVEL_DIRECTORY/.git/gc.log"
 fi
+
+recover_root
 
 ERR=""
