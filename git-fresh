@@ -175,9 +175,11 @@ recover_root () {
 
   if [[ "$CORRUPT_ROOT_HEAD" = "true" || "$MISSING_ROOT_HEAD" = "true" ]]; then
     ERR="failed to recover $ROOT HEAD"
-    RECOVERED_ROOT_HEAD=$(cat "$TOP_LEVEL_DIRECTORY/.git/logs/refs/heads/$ROOT" | tail -n1 | cut -d' ' -f1)
+    RECOVERED_ROOT_HEAD=$(cat "$TOP_LEVEL_DIRECTORY/.git/logs/refs/heads/$ROOT" | tail -n1 | cut -d' ' -f2)
     echo "$RECOVERED_ROOT_HEAD" > "$ROOT_HEAD_FILE"
     say "Recovered $ROOT HEAD, set to $RECOVERED_ROOT_HEAD"
+    CORRUPT_ROOT_HEAD=false
+    MISSING_ROOT_HEAD=false
   fi
 }
 
