@@ -1,6 +1,6 @@
 {
   "name": "git-fresh",
-  "version": "1.12.0",
+  "version": "1.12.1",
   "description": "Utility to keep Git repositories fresh",
   "global": true,
   "repo": "imsky/git-fresh",
