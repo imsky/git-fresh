@@ -185,6 +185,9 @@ recover_root () {
 
 recover_root
 
+LAST_WORKING_DIRECTORY="$(pwd)"
+cd "$TOP_LEVEL_DIRECTORY"
+
 ERR="could not get current commit"
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 ERR=""
@@ -376,6 +379,12 @@ if ! git gc --auto --force; then
   ERR="git prune failed"
   git prune
   rm -rf "$TOP_LEVEL_DIRECTORY/.git/gc.log"
+fi
+
+if [[ -d "$LAST_WORKING_DIRECTORY" ]]; then
+    cd "$LAST_WORKING_DIRECTORY"
+else
+    say "Previous working directory does not exist on the branch $ROOT"
 fi
 
 recover_root
