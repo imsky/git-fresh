@@ -159,7 +159,14 @@ fi
 ERR="could not get top-level-directory"
 TOP_LEVEL_DIRECTORY=$(git rev-parse --show-toplevel)
 REMOTE=${1:-origin}
-ROOT=${2:-master}
+
+ROOT_GUESS=master
+
+if [[ -n $(git show-ref refs/heads/main) && -z $(git show-ref refs/heads/master) ]]; then
+  ROOT_GUESS=main
+fi
+
+ROOT=${2:-$ROOT_GUESS}
 
 # Recover the root HEAD if it is missing or corrupt (e.g. master head reads "master")
 recover_root () {
