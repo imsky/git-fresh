@@ -58,7 +58,7 @@ This usually is `C:\Program Files\Git\usr\bin`.
 ### Package
 
 * [Homebrew](http://brew.sh/): `brew install git-fresh`
-* [bpkg](http://www.bpkg.io/): `bpkg install imsky/git-fresh`
+* [bpkg](http://www.bpkg.sh/): `bpkg install imsky/git-fresh`
 * [AUR](https://aur.archlinux.org/): [git-fresh](https://aur.archlinux.org/packages/git-fresh/)
 
 ## License
