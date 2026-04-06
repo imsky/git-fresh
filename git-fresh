@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# generate man page with: txt2man.sh -t git-fresh <(./git-fresh -?) > git-fresh.1
+# generate man page with: txt2man.sh -t git-fresh <(./git-fresh --help) > git-fresh.1
 
 # git-fresh
 # https://github.com/imsky/git-fresh
@@ -54,17 +54,17 @@ exit 0
 }
 
 say () {
-  echo "[git-fresh] $@" 1>&2
+  echo "[git-fresh] $*" 1>&2
 }
 
 die () {
-  say $@
+  say "$@"
   exit 1
 }
 
 error () {
   ERR=${ERR:-unknown}
-  die "Error on line $1: $ERR"
+  die "Error on line ${1}: $ERR"
 }
 
 trap 'error $LINENO' ERR
@@ -131,18 +131,18 @@ if [[ $TEST = true ]]; then
   TEST_DIR=/tmp/git-fresh-test
   fail_test () {
     echo 'Tests failed!'
-    rm -rf $TEST_DIR
+    rm -rf "$TEST_DIR"
     exit 1
   }
 
-  rm -rf $TEST_DIR; mkdir -p $TEST_DIR; cd $TEST_DIR
+  rm -rf "$TEST_DIR"; mkdir -p "$TEST_DIR"; cd "$TEST_DIR"
   git init; touch test; git add test; git commit -am 'test'
   git checkout -b test; rm test; git commit -am 'delete test'
   git checkout master; git merge test; git checkout test
   git-fresh -fr; git rev-parse --verify test && fail_test || true
   git checkout -b test; git checkout master; git-fresh; git checkout -
   git rev-parse --abbrev-ref HEAD | grep -q test || fail_test
-  rm -rf $TEST_DIR
+  rm -rf "$TEST_DIR"
   echo 'Tests passed!'
   exit 0
 fi
@@ -164,7 +164,7 @@ ROOT_GUESS=master
 ROOT_CANDIDATES="$ROOT_GUESS main trunk develop"
 
 for CANDIDATE in $ROOT_CANDIDATES; do
-  if [[ -n $(git show-ref refs/heads/$CANDIDATE) ]]; then
+  if [[ -n $(git show-ref "refs/heads/$CANDIDATE") ]]; then
     ROOT_GUESS=$CANDIDATE
     break
   fi
@@ -177,7 +177,7 @@ recover_root () {
   ROOT_HEAD_FILE="$TOP_LEVEL_DIRECTORY/.git/refs/heads/$ROOT"
 
   if [[ -e "$ROOT_HEAD_FILE" ]]; then
-    if [[ $(cat "$ROOT_HEAD_FILE") = $(echo $ROOT) ]]; then
+    if [[ $(cat "$ROOT_HEAD_FILE") = "$ROOT" ]]; then
       CORRUPT_ROOT_HEAD=true
     fi
   else
@@ -186,7 +186,7 @@ recover_root () {
 
   if [[ "$CORRUPT_ROOT_HEAD" = "true" || "$MISSING_ROOT_HEAD" = "true" ]]; then
     ERR="failed to recover $ROOT HEAD"
-    RECOVERED_ROOT_HEAD=$(cat "$TOP_LEVEL_DIRECTORY/.git/logs/refs/heads/$ROOT" | tail -n1 | cut -d' ' -f2)
+    RECOVERED_ROOT_HEAD=$(tail -n1 "$TOP_LEVEL_DIRECTORY/.git/logs/refs/heads/$ROOT" | cut -d' ' -f2)
     echo "$RECOVERED_ROOT_HEAD" > "$ROOT_HEAD_FILE"
     say "Recovered $ROOT HEAD, set to $RECOVERED_ROOT_HEAD"
     CORRUPT_ROOT_HEAD=false
@@ -227,27 +227,27 @@ STASH_STAMP=git-fresh-$(date +%s)
 
 if ! git diff-files --quiet; then
   ERR="could not stash changes"
-  git stash save $STASH_STAMP
+  git stash save "$STASH_STAMP"
 fi
 
 if [[ $REMOTES = true ]]; then
   # Update remotes and prune stale remotes
   ERR="could not update and prune remotes"
-  git remote prune $REMOTE
-  git remote update $REMOTE
-  git remote prune $REMOTE
+  git remote prune "$REMOTE"
+  git remote update "$REMOTE"
+  git remote prune "$REMOTE"
 fi
 
 # If we are not already on root branch, switch to root branch (master)
 
 if [[ "$ROOT" != "$CURRENT" ]]; then
   ERR="could not check out $ROOT branch"
-  git checkout $ROOT > /dev/null 2>&1
+  git checkout "$ROOT" > /dev/null 2>&1
 fi
 
 # Wipe workspace?
 
-if [[ $WIPE_WORKSPACE = true ]]; then
+if [[ "$WIPE_WORKSPACE" = true ]]; then
   ERR="could not wipe workspace"
   git clean -dfx
 fi
@@ -255,13 +255,13 @@ fi
 if [[ $REMOTES = true ]]; then
   # Reset root?
 
-  if [[ $RESET_ROOT = true ]]; then
+  if [[ "$RESET_ROOT" = true ]]; then
     ERR="could not reset root"
-    git reset --hard $REMOTE/$ROOT
+    git reset --hard "$REMOTE/$ROOT"
   fi
 
   ERR="could not perform fast forward merge"
-  git pull --quiet --ff-only $REMOTE $ROOT || say "Fast forward merge failed on $ROOT. You can reset local $ROOT by running git fresh -R."
+  git pull --quiet --ff-only "$REMOTE" "$ROOT" || say "Fast forward merge failed on $ROOT. You can reset local $ROOT by running git fresh -R."
 fi
 
 # Compute stale branches
@@ -279,17 +279,17 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
   if [[ ! -z "${LOCAL_STALE// }" ]]; then
     STALE_BRANCHES=true
     if [[ -f "$FRESH_IGNORE" ]]; then
-      LOCAL_STALE=$(echo -n $LOCAL_STALE | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " ")
+      LOCAL_STALE=$(echo -n "$LOCAL_STALE" | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " ")
       if [[ -z $LOCAL_STALE ]]; then
         STALE_BRANCHES=false
       fi
     fi
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
       ERR="could not delete stale local branches: $LOCAL_STALE"
-      echo -n $LOCAL_STALE | tr " " "\0" | xargs -0 git branch -d 2> /dev/null
+      echo -n "$LOCAL_STALE" | tr " " "\0" | xargs -0 git branch -d 2> /dev/null
     else
       if [[ $STALE_BRANCHES = true ]]; then
-        say "Local stale branches found:" $(echo -n $LOCAL_STALE | tr "\n" " ")
+        say "Local stale branches found:" "$(echo -n "$LOCAL_STALE" | tr "\n" " ")"
       fi
     fi
   fi
@@ -297,7 +297,7 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
   if [[ ! -z "${REMOTE_STALE// }" ]]; then
     STALE_BRANCHES=true
     if [[ -f "$FRESH_IGNORE" ]]; then
-      REMOTE_STALE=$(echo -n $REMOTE_STALE | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " ")
+      REMOTE_STALE=$(echo -n "$REMOTE_STALE" | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " ")
       if [[ -z $REMOTE_STALE ]]; then
         STALE_BRANCHES=false
       fi
@@ -305,11 +305,11 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
       if [[ "$DELETE_ONLY_LOCAL" != true ]]; then
         ERR="could not delete stale remote branches: $REMOTE_STALE"
-        echo -n $REMOTE_STALE | tr " " "\0" | xargs -0 git push $REMOTE --delete
+        echo -n "$REMOTE_STALE" | tr " " "\0" | xargs -0 git push "$REMOTE" --delete
       fi
     else
       if [[ $STALE_BRANCHES = true ]]; then
-        say "Remote stale branches found:" $(echo -n $REMOTE_STALE | tr "\n" " ")
+        say "Remote stale branches found:" "$(echo -n "$REMOTE_STALE" | tr "\n" " ")"
       fi
     fi
   fi
@@ -322,7 +322,7 @@ fi
 # Remove tracking information for missing upstreams
 
 if [[ ! -z $(git branch -vv | grep -F "[$REMOTE/$CURRENT: gone]") ]]; then
-  git branch --unset-upstream $CURRENT
+  git branch --unset-upstream "$CURRENT"
 fi
 
 # Rebase or merge remote root against local branch
@@ -330,7 +330,7 @@ fi
 if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
   if [[ "$ROOT" != "$CURRENT" ]]; then
     ERR="could not check out $CURRENT branch"
-    git checkout $CURRENT
+    git checkout "$CURRENT"
     recover_root
   fi
 
@@ -340,12 +340,12 @@ if [[ ! -z $(git rev-parse --verify --quiet "$CURRENT") ]]; then
     if [[ "$REMOTES" = true ]]; then
       if [[ "$REBASE" = true ]]; then
         ERR="could not rebase against $ROOT branch"
-        git rebase $ROOT
+        git rebase "$ROOT"
       fi
 
       if [[ "$MERGE" = true ]]; then
         ERR="could not merge $ROOT branch"
-        git merge --no-edit $ROOT
+        git merge --no-edit "$ROOT"
       fi
     fi
   fi
@@ -357,20 +357,20 @@ fi
 
 if [[ "$TAGS" = true ]]; then
   ERR="could not get remote tags"
-  REMOTE_TAGS=$(git ls-remote --tags $REMOTE | cut -f 2)
+  REMOTE_TAGS=$(git ls-remote --tags "$REMOTE" | cut -f 2)
   LOCAL_TAGS=$(git show-ref --tags | cut -d' ' -f 2)
 
   for tag in $LOCAL_TAGS; do
-    if [[ -z $(grep $tag <<< "$REMOTE_TAGS" | cat) ]]; then
+    if [[ -z $(grep "$tag" <<< "$REMOTE_TAGS" | cat) ]]; then
       MISSING_TAG="${tag//refs\/tags\/}"
-      git tag -d $MISSING_TAG
+      git tag -d "$MISSING_TAG"
     fi
   done
 fi
 
 # Restore stashed changes
 
-if [[ ! -z $(git stash list | grep $STASH_STAMP | cat) ]]; then
+if [[ ! -z $(git stash list | grep "$STASH_STAMP" | cat) ]]; then
   if [[ "$APPLY_STASH" = true ]]; then
     ERR="could not apply stashed changes"
     git stash pop
