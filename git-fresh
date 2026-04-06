@@ -226,7 +226,7 @@ fi
 FRESH_IGNORE="$TOP_LEVEL_DIRECTORY/.freshignore"
 
 if [[ ! -f $FRESH_IGNORE ]]; then
-  FRESH_IGNORE="~/.freshignore"
+  FRESH_IGNORE="$HOME/.freshignore"
 fi
 
 if [[ -f $FRESH_IGNORE ]]; then
@@ -241,7 +241,7 @@ STASH_STAMP=git-fresh-$(date +%s)
 
 if ! git diff-files --quiet; then
   ERR="could not stash changes"
-  git stash save "$STASH_STAMP"
+  git stash push -m "$STASH_STAMP"
 fi
 
 if [[ "$REMOTES" = true ]]; then
