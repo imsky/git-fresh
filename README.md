@@ -38,6 +38,10 @@ OPTIONS
   -v  Print git-fresh version and exit
 ```
 
+## Requirements
+
+Git 2.13.0 or newer.
+
 ## Installation
 
 ### Manual on Linux or macOS
