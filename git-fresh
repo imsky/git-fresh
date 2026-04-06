@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # generate man page with: txt2man.sh -t git-fresh <(./git-fresh --help) > git-fresh.1
 
 # git-fresh
@@ -69,7 +70,19 @@ error () {
 
 trap 'error $LINENO' ERR
 
-if [[ "$1" = '--help' ]]; then
+FORCE_DELETE_STALE=false
+MERGE=false
+REBASE=false
+TAGS=false
+APPLY_STASH=false
+DELETE_ONLY_LOCAL=false
+RESET_ROOT=false
+WIPE_WORKSPACE=false
+CLEAR_STASH=false
+TEST=false
+VERSION=""
+
+if [[ "${1:-}" = '--help' ]]; then
   usage
 fi
 
@@ -119,14 +132,14 @@ shift $((OPTIND-1))
 
 # Are we in version mode?
 
-if [[ ! -z $VERSION ]]; then
+if [[ -n "$VERSION" ]]; then
   echo git-fresh $VERSION
   exit 0
 fi
 
 # Are we in testing mode?
 
-if [[ $TEST = true ]]; then
+if [[ "$TEST" = true ]]; then
   PATH=$(pwd):$PATH
   TEST_DIR=/tmp/git-fresh-test
   fail_test () {
@@ -149,7 +162,7 @@ fi
 
 # Are we inside a git repository?
 
-INSIDE_GIT_REPO=$(git rev-parse --is-inside-work-tree 2> /dev/null)
+INSIDE_GIT_REPO=$(git rev-parse --is-inside-work-tree 2> /dev/null || true)
 
 if [[ -z "$INSIDE_GIT_REPO" ]]; then
   die "Not a git repository"
@@ -203,6 +216,7 @@ ERR="could not get current commit"
 CURRENT=$(git rev-parse --abbrev-ref HEAD)
 ERR=""
 
+REMOTES=false
 if [[ $(git remote -v | wc -l) -gt "0" ]]; then
   REMOTES=true
 fi
@@ -216,7 +230,7 @@ if [[ ! -f $FRESH_IGNORE ]]; then
 fi
 
 if [[ -f $FRESH_IGNORE ]]; then
-    if [[ ! -z $(grep -Fx "$CURRENT" "$FRESH_IGNORE") ]]; then
+    if grep -qFx "$CURRENT" "$FRESH_IGNORE"; then
         die "Branch $CURRENT is ignored"
     fi
 fi
@@ -230,7 +244,7 @@ if ! git diff-files --quiet; then
   git stash save "$STASH_STAMP"
 fi
 
-if [[ $REMOTES = true ]]; then
+if [[ "$REMOTES" = true ]]; then
   # Update remotes and prune stale remotes
   ERR="could not update and prune remotes"
   git remote prune "$REMOTE"
@@ -252,7 +266,7 @@ if [[ "$WIPE_WORKSPACE" = true ]]; then
   git clean -dfx
 fi
 
-if [[ $REMOTES = true ]]; then
+if [[ "$REMOTES" = true ]]; then
   # Reset root?
 
   if [[ "$RESET_ROOT" = true ]]; then
@@ -267,26 +281,27 @@ fi
 # Compute stale branches
 
 ERR="could not determine stale branches"
-SMART_STALE=$(git branch -a --merged | tr -d "\* " | grep -Ev ">|$ROOT" | cat)
+STALE_BRANCHES=false
+SMART_STALE=$(git branch -a --merged | tr -d "\* " | grep -Ev ">|$ROOT" || true)
 
-LOCAL_STALE=$(grep -Ev "^remotes/" <<< "$SMART_STALE" | cat)
-REMOTE_STALE=$(grep -E "^remotes/" <<< "$SMART_STALE" | cat)
+LOCAL_STALE=$(grep -Ev "^remotes/" <<< "$SMART_STALE" || true)
+REMOTE_STALE=$(grep -E "^remotes/" <<< "$SMART_STALE" || true)
 #todo: add flag to prune all remote branches
-REMOTE_STALE=$(grep "^remotes/$REMOTE" <<< "$REMOTE_STALE" | cat)
+REMOTE_STALE=$(grep "^remotes/$REMOTE" <<< "$REMOTE_STALE" || true)
 REMOTE_STALE=${REMOTE_STALE//remotes\/$REMOTE\/}
 
 if [[ ! -z "${SMART_STALE// }" ]]; then
   if [[ ! -z "${LOCAL_STALE// }" ]]; then
     STALE_BRANCHES=true
     if [[ -f "$FRESH_IGNORE" ]]; then
-      LOCAL_STALE=$(echo -n "$LOCAL_STALE" | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " ")
+      LOCAL_STALE=$(echo -n "$LOCAL_STALE" | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " " || true)
       if [[ -z $LOCAL_STALE ]]; then
         STALE_BRANCHES=false
       fi
     fi
     if [[ "$FORCE_DELETE_STALE" = true ]]; then
       ERR="could not delete stale local branches: $LOCAL_STALE"
-      echo -n "$LOCAL_STALE" | tr " " "\0" | xargs -0 git branch -d 2> /dev/null
+      echo -n "$LOCAL_STALE" | tr " " "\0" | xargs -0 git branch -d 2> /dev/null || true
     else
       if [[ $STALE_BRANCHES = true ]]; then
         say "Local stale branches found:" "$(echo -n "$LOCAL_STALE" | tr "\n" " ")"
@@ -297,7 +312,7 @@ if [[ ! -z "${SMART_STALE// }" ]]; then
   if [[ ! -z "${REMOTE_STALE// }" ]]; then
     STALE_BRANCHES=true
     if [[ -f "$FRESH_IGNORE" ]]; then
-      REMOTE_STALE=$(echo -n "$REMOTE_STALE" | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " ")
+      REMOTE_STALE=$(echo -n "$REMOTE_STALE" | tr " " "\n" | grep -Fxvf "$FRESH_IGNORE" | tr "\n" " " || true)
       if [[ -z $REMOTE_STALE ]]; then
         STALE_BRANCHES=false
       fi
@@ -321,7 +336,7 @@ fi
 
 # Remove tracking information for missing upstreams
 
-if [[ ! -z $(git branch -vv | grep -F "[$REMOTE/$CURRENT: gone]") ]]; then
+if git branch -vv | grep -qF "[$REMOTE/$CURRENT: gone]"; then
   git branch --unset-upstream "$CURRENT"
 fi
 
@@ -370,7 +385,7 @@ fi
 
 # Restore stashed changes
 
-if [[ ! -z $(git stash list | grep "$STASH_STAMP" | cat) ]]; then
+if git stash list | grep -q "$STASH_STAMP"; then
   if [[ "$APPLY_STASH" = true ]]; then
     ERR="could not apply stashed changes"
     git stash pop
